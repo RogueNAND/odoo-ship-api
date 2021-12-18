@@ -1,0 +1,15 @@
+<odoo noupdate="1">
+
+    <!-- In case of API connection issues or other errors, we want to discard caches every so often -->
+    <record id="delivery_carrier_api_cron" model="ir.cron">
+        <field name="name">Delivery API Clear Caches</field>
+        <field name="model_id" ref="model_delivery_carrier_api"/>
+        <field name="state">code</field>
+        <field name="code">model._manage_cache()</field>
+        <field name="interval_number">10</field>
+        <field name="interval_type">minutes</field>
+        <field name="numbercall">-1</field>
+        <field name="doall" eval="False"/>
+    </record>
+
+</odoo>

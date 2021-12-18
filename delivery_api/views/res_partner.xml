@@ -1,0 +1,22 @@
+<odoo>
+
+    <record id="res_partner_view_form" model="ir.ui.view">
+        <field name="name">res.partner.view.form.easypost</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+
+            <field name="country_id" position="after">
+                <field name="ship_stored_hash" invisible="1"/>
+                <field name="address_residential" invisible="1"/>
+                <span attrs="{'invisible': ['|', ('ship_address_dirty', '=', True), ('address_residential', '=', False)]}">🏠 Residential</span>
+                <span attrs="{'invisible': ['|', ('ship_address_dirty', '=', True), ('address_residential', '=', True)]}">🏢 Commercial</span>
+                <field name="ship_address_dirty" invisible="1"/>
+                <button name="action_verify_ship_address" string="Verify Shipping Address" type="object" class="btn-secondary"
+                        attrs="{'invisible': ['|', ('ship_address_dirty', '=', False), '&amp;', ('type', '=', 'contact'), ('parent_id', '!=', False)]}"/>
+            </field>
+
+        </field>
+    </record>
+
+</odoo>

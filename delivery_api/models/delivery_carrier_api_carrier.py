@@ -1,0 +1,31 @@
+from odoo import fields, models
+
+
+class DeliveryCarrierApiCarrier(models.Model):
+    _name = 'delivery.carrier.api.carrier'
+    _description = 'API Carrier'
+
+    code = fields.Char(required=True)
+    name = fields.Char(required=True)
+    ltl = fields.Boolean(string="LTL", help="Less then TruckLoad")
+    delivery_api_id = fields.Many2one('delivery.carrier.api', required=True, ondelete='cascade')
+    service_ids = fields.One2many('delivery.carrier.api.carrier.service', 'api_carrier_id')
+
+    _sql_constraints = [('code_api_unique', 'unique(code)', 'Programming error: API Carrier already exists')]
+
+    def sync_services(self, services):
+        """ Ensure all carrier accounts and services are loaded from api """
+
+        self.ensure_one()
+
+        service_ids = self.env['delivery.carrier.api.carrier.service']
+        for service in services:
+            service_id = self.env['delivery.carrier.api.carrier.service'].search([
+                ('api_carrier_id', '=', self.id),
+                ('code', '=', service['code'])
+            ]) or self.env['delivery.carrier.api.carrier.service'].create({'api_carrier_id': self.id, **service})
+            service_id.write(service)
+            service_ids |= service_id
+
+        services_to_delete = self.env['delivery.carrier.api.carrier.service'].search([('api_carrier_id', '=', self.id)]) - service_ids
+        services_to_delete.unlink()

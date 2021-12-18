@@ -1,0 +1,61 @@
+<odoo>
+
+    <record id="res_partner_verify_view_form" model="ir.ui.view">
+        <field name="name">res.partner.verify.view.form</field>
+        <field name="model">res.partner.verify</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <field name="diff_street" invisible="1"/>
+                    <field name="diff_street2" invisible="1"/>
+                    <field name="diff_city" invisible="1"/>
+                    <field name="diff_state" invisible="1"/>
+                    <field name="diff_zip" invisible="1"/>
+                    <field name="diff_country" invisible="1"/>
+                    <group>
+                        <group name="original_address" string="Original Address">
+                            <div class="o_address_format">
+                                <field name="origin_street" placeholder="Street..." class="o_address_street"
+                                       decoration-danger="diff_street" decoration-bf="diff_street"/>
+                                <field name="origin_street2" placeholder="Street 2..." class="o_address_street"
+                                       decoration-danger="diff_street2" decoration-bf="diff_street2"/>
+                                <field name="origin_city" placeholder="City" class="o_address_city"
+                                       decoration-danger="diff_city" decoration-bf="diff_city"/>
+                                <field name="origin_state_id" class="o_address_state" placeholder="State" options="{'no_open': True}"
+                                       decoration-danger="diff_state" decoration-bf="diff_state"/>
+                                <field name="origin_zip" placeholder="ZIP" class="o_address_zip"
+                                       decoration-danger="diff_zip" decoration-bf="diff_zip"/>
+                                <field name="origin_country_id" placeholder="Country" class="o_address_country" options="{'no_open': True}"
+                                       decoration-danger="diff_country" decoration-bf="diff_country"/>
+                            </div>
+                        </group>
+                        <group name="corrected_address" string="Corrected Address">
+                            <div class="o_address_format">
+                                <field name="street" placeholder="Street..." class="o_address_street"
+                                       decoration-success="diff_street" decoration-bf="diff_street"/>
+                                <field name="street2" placeholder="Street 2..." class="o_address_street"
+                                       decoration-success="diff_street2" decoration-bf="diff_street2"/>
+                                <field name="city" placeholder="City" class="o_address_city"
+                                       decoration-success="diff_city" decoration-bf="diff_city"/>
+                                <field name="state_id" class="o_address_state" placeholder="State" options="{'no_open': True}"
+                                       decoration-success="diff_state" decoration-bf="diff_state"/>
+                                <field name="zip" placeholder="ZIP" class="o_address_zip"
+                                       decoration-success="diff_zip" decoration-bf="diff_zip"/>
+                                <field name="country_id" placeholder="Country" class="o_address_country" options="{'no_open': True}"
+                                       decoration-success="diff_country" decoration-bf="diff_country"/>
+                            </div>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="message" nolabel="1"/>
+                    </group>
+                </sheet>
+                <footer>
+                    <button string="Use Corrected Address" name="action_update_partner_address" class="btn-primary" type="object"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+</odoo>

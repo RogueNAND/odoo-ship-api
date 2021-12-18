@@ -1,0 +1,66 @@
+<odoo>
+
+    <!-- Carriers -->
+    <record id="delivery_carrier_api_carrier_menu_action" model="ir.actions.act_window">
+        <field name="name">Carriers</field>
+        <field name="res_model">delivery.carrier.api.carrier</field>
+        <field name="domain" eval="[]"/>
+        <field name="context" eval="{}"/>
+        <field name="view_mode">list,form</field>
+    </record>
+    <menuitem id="delivery_carrier_api_carrier_menu"
+              parent="delivery.menu_delivery"
+              name="Carriers"
+              action="delivery_carrier_api_carrier_menu_action"
+              sequence="3"/>
+
+    <record id="delivery_carrier_api_carrier_view_form" model="ir.ui.view">
+        <field name="name">delivery.carrier.api.carrier.view.form</field>
+        <field name="model">delivery.carrier.api.carrier</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="code"/>
+                            <field name="ltl"/>
+                        </group>
+                        <field name="delivery_api_id"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="delivery_carrier_api_carrier_view_tree" model="ir.ui.view">
+        <field name="name">delivery.carrier.api.carrier.view.tree</field>
+        <field name="model">delivery.carrier.api.carrier</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="code"/>
+                <field name="ltl"/>
+                <field name="delivery_api_id"/>
+            </tree>
+        </field>
+    </record>
+    <record id="delivery_carrier_api_carrier_search" model="ir.ui.view">
+        <field name="name">delivery.carrier.api.carrier.search</field>
+        <field name="model">delivery.carrier.api.carrier</field>
+        <field name="arch" type="xml">
+            <search string="delivery_carrier_api_carrier">
+                <field name="name"/>
+                <field name="code"/>
+                <filter string="LTL" name="ltl" domain="[('ltl', '=', True)]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_delivery_api_id" string="Delivery API" context="{'group_by': 'delivery_api_id'}"/>
+                </group>
+            </search>
+       </field>
+    </record>
+
+</odoo>

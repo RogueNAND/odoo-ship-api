@@ -1,0 +1,89 @@
+<odoo>
+
+    <!-- Stock Shipping API's -->
+    <record id="delivery_carrier_api_sales_menu_action" model="ir.actions.act_window">
+        <field name="name">Shipping API's</field>
+        <field name="res_model">delivery.carrier.api</field>
+        <field name="view_mode">list,form</field>
+    </record>
+    <menuitem id="delivery_carrier_api_menu"
+              parent="sale.menu_sales_config"
+              name="Shipping API's"
+              action="delivery_carrier_api_sales_menu_action"
+              sequence="5"/>
+
+    <!-- Sales Shipping API's -->
+    <record id="delivery_carrier_api_stock_menu_action" model="ir.actions.act_window">
+        <field name="name">Shipping API's</field>
+        <field name="res_model">delivery.carrier.api</field>
+        <field name="view_mode">list,form</field>
+    </record>
+    <menuitem id="delivery_carrier_api_stock_menu"
+              parent="delivery.menu_delivery"
+              name="Shipping API's"
+              action="delivery_carrier_api_stock_menu_action"
+              sequence="2"/>
+
+    <record id="delivery_carrier_api_view_form" model="ir.ui.view">
+        <field name="name">delivery.carrier.api.view.form</field>
+        <field name="model">delivery.carrier.api</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_sync" string="Sync Data with API" type="object" class="oe_highlight"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="delivery_api"/>
+                            <field name="api_key_prod"/>
+                            <field name="api_key_test"/>
+                            <field name="currency_id"/>
+                            <field name="api_carrier_ids" widget="many2many_tags"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group name="supported_features" string="Supported Features">
+                            <field name="supports_test_environment"/>
+                            <field name="supports_address_validation"/>
+                            <field name="supports_tracking"/>
+                            <field name="supports_insurance"/>
+                            <field name="supports_returns"/>
+                            <field name="supports_ltl"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="delivery_carrier_api_view_tree" model="ir.ui.view">
+        <field name="name">delivery.carrier.api.view.tree</field>
+        <field name="model">delivery.carrier.api</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="delivery_api"/>
+                <field name="supports_test_environment"/>
+                <field name="supports_address_validation"/>
+                <field name="supports_tracking"/>
+                <field name="supports_insurance"/>
+                <field name="supports_returns"/>
+                <field name="supports_ltl"/>
+            </tree>
+        </field>
+    </record>
+    <record id="delivery_carrier_api_search" model="ir.ui.view">
+        <field name="name">delivery.carrier.api.search</field>
+        <field name="model">delivery.carrier.api</field>
+        <field name="arch" type="xml">
+            <search string="Shipping API">
+                <field name="delivery_api"/>
+            </search>
+       </field>
+    </record>
+
+</odoo>
