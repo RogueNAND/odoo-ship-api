@@ -181,7 +181,7 @@ class DeliveryCarrierApi(models.Model):
                                 % (', '.join(required_values), ', '.join(returned_values)))
 
             # Some API's will specify if a user confirmation is recommended, otherwise we can check ourselves
-            user_confirm = result['success'] and result.get('user_confirmm', self.compare_address_diff(
+            user_confirm = result['success'] and result.get('user_confirm', self.compare_address_diff(
                 street, street2, city, state_code, zip, country_code,
                 data['street'], data['street2'], data['city'], data['state'], data['zip'], data['country']
             ))
