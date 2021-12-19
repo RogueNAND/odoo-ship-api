@@ -89,3 +89,4 @@ class DeliveryCarrierApi(models.Model):
 TODO:
 - Proper multi-currency support
 - Website user should be able to confirm major address changes
+- Identify on Shipping API form view whether it's globally set as 'Test' or 'Production'
