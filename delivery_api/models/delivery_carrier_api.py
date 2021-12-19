@@ -103,7 +103,7 @@ class DeliveryCarrierApi(models.Model):
 
         return {diff_key: diff_val for diff_key, diff_val in diffs.items() if diff_val} or False
 
-    def detect_outage(self, good_service_ids):
+    def detect_outage(self, active_service_ids, good_service_ids):
         """ Bad data shouldn't be cached for too long.
         If any carrier is 100% unsuccessful, mark a possible outage so the cache can be cleared sooner.
         """
@@ -111,8 +111,7 @@ class DeliveryCarrierApi(models.Model):
         self.ensure_one()
         if good_service_ids:
             good_service_ids = self.env['delivery.carrier.api.carrier.service'].browse(good_service_ids)
-            good_carrier_ids = good_service_ids.api_carrier_id
-            bad_carrier_ids = self.api_carrier_ids - good_carrier_ids
+            bad_carrier_ids = active_service_ids.api_carrier_id - good_service_ids.api_carrier_id
             if bad_carrier_ids:
                 logger.warning("Detected possible outage for carriers. Signaling for cache reset: %s", ', '.join(bad_carrier_ids.mapped('name')))
                 self.possible_outage_detected = True
@@ -213,7 +212,7 @@ class DeliveryCarrierApi(models.Model):
 
         active_service_ids = self.carrier_ids.service_id
         service_rate_map = getattr(self, attr_name)(from_partner_id, to_partner_id, length, width, height, weight, active_service_ids)
-        self.detect_outage([service for service, rate in service_rate_map.items() if rate[0] and not rate[2]])
+        self.detect_outage(active_service_ids, [service for service, rate in service_rate_map.items() if rate[0] and not rate[2]])
         return service_rate_map
 
     def rate_estimate(self, from_partner_id, to_partner_id, order_line_ids):
