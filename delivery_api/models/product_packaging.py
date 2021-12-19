@@ -35,3 +35,11 @@ class ProductPackaging(models.Model):
     def _compute_volume(self):
         for packaging in self:
             packaging.volume = packaging.height * packaging.width * packaging.packaging_length
+
+    def write(self, vals):
+        """ Ensure sale.order.line estimate_package() does not pull from cache if any packages are changed """
+
+        res = super(ProductPackaging, self).write(vals)
+        if any(f in vals for f in ['packaging_length', 'width', 'height', 'variable_dimensions', 'min_height', 'max_weight']):
+            self.env['sale.order.line'].clear_caches()
+        return res
