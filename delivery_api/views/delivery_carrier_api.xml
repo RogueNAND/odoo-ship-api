@@ -40,7 +40,7 @@
                     </div>
                     <group>
                         <group>
-                            <field name="delivery_api"/>
+                            <field name="delivery_api" required="1"/>
                             <field name="api_key_prod"/>
                             <field name="api_key_test"/>
                             <field name="currency_id"/>
