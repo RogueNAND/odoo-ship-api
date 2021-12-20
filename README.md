@@ -1,4 +1,7 @@
 # Odoo Shipping API
+
+***THIS MODULE IS CURRENTLY IN DEVELOPMENT AND IS MISSING MANY KEY FEATURES! USE AT YOUR OWN RISK UNTIL FURTHER NOTICE!***
+
 This module is intended to be a development platform for connecting multiple shipping API's.
 
 Requires the 'product_dimension' module from [OCA/product-attribute](https://github.com/OCA/product-attribute)
@@ -90,3 +93,5 @@ TODO:
 - Proper multi-currency support
 - Website user should be able to confirm major address changes
 - Identify on Shipping API form view whether it's globally set as 'Test' or 'Production'
+- Possibly cache rates outside of delivery_api
+- Write tests
