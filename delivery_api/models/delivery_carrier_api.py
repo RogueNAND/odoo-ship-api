@@ -14,7 +14,7 @@ class DeliveryCarrierApi(models.Model):
     name = fields.Char(required=True)
     delivery_api = fields.Selection([])
     carrier_ids = fields.One2many('delivery.carrier', 'delivery_api_id', readonly=True)
-    api_carrier_ids = fields.One2many('delivery.carrier.api.carrier', 'delivery_api_id', readonly=True)
+    api_carrier_ids = fields.One2many('delivery.carrier.api.carrier', 'delivery_api_id', string="Supported Carriers")
     global_prod_environment = fields.Boolean(compute='_compute_global_prod_environment')
     api_key_prod = fields.Char()
     api_key_test = fields.Char()

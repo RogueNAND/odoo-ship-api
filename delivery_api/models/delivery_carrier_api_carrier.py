@@ -5,11 +5,12 @@ class DeliveryCarrierApiCarrier(models.Model):
     _name = 'delivery.carrier.api.carrier'
     _description = 'API Carrier'
 
-    code = fields.Char(required=True)
-    name = fields.Char(required=True)
-    ltl = fields.Boolean(string="LTL", help="Less then TruckLoad")
-    delivery_api_id = fields.Many2one('delivery.carrier.api', required=True, ondelete='cascade')
-    service_ids = fields.One2many('delivery.carrier.api.carrier.service', 'api_carrier_id')
+    code = fields.Char(required=True, readonly=True)
+    name = fields.Char(required=True, readonly=True)
+    usable = fields.Boolean(help="Allows this carrier to be shown or hidden when creating a shipping method")
+    ltl = fields.Boolean(string="LTL", help="Less then TruckLoad", readonly=True)
+    delivery_api_id = fields.Many2one('delivery.carrier.api', required=True, ondelete='cascade', readonly=True)
+    service_ids = fields.One2many('delivery.carrier.api.carrier.service', 'api_carrier_id', readonly=True)
 
     _sql_constraints = [('code_api_unique', 'unique(code)', 'Programming error: API Carrier already exists')]
 

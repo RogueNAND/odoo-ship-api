@@ -8,7 +8,7 @@ class DeliveryCarrier(models.Model):
     delivery_type = fields.Selection(selection_add=[('ship_api', 'Shipping API')],
                                      ondelete={'ship_api': lambda x: x.write({'delivery_type': 'fixed', 'fixed_price': 0})})
     delivery_api_id = fields.Many2one('delivery.carrier.api')
-    api_carrier_id = fields.Many2one('delivery.carrier.api.carrier', domain="[('delivery_api_id', '=', delivery_api_id)]")
+    api_carrier_id = fields.Many2one('delivery.carrier.api.carrier', domain="[('delivery_api_id', '=', delivery_api_id), ('usable', '=', True)]")
     service_id = fields.Many2one('delivery.carrier.api.carrier.service', domain="[('api_carrier_id', '=', api_carrier_id)]")
 
     def name_get(self):

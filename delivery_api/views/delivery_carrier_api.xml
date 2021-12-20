@@ -44,7 +44,13 @@
                             <field name="api_key_prod"/>
                             <field name="api_key_test"/>
                             <field name="currency_id"/>
-                            <field name="api_carrier_ids" widget="many2many_tags"/>
+                            <field name="api_carrier_ids">
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="code"/>
+                                    <field name="usable" widget="boolean_toggle"/>
+                                </tree>
+                            </field>
                         </group>
                     </group>
                     <group>
