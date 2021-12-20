@@ -1,4 +1,5 @@
 from odoo import fields, models, _
+from odoo.tools import float_round
 from odoo.exceptions import UserError
 import json, requests
 
@@ -81,6 +82,14 @@ class DeliveryCarrierApi(models.Model):
 
     def shipengine_rate_estimate(self, from_partner_id, to_partner_id, length, width, height, weight, active_service_ids):
         code_service_map = {service_id.code: service_id.id for service_id in active_service_ids}
+        weight_unit_name = "pound" if self.env['product.template']._get_weight_uom_id_from_ir_config_parameter() == self.env.ref('uom.product_uom_lb') else "kilogram"
+        if self.env['product.template']._get_length_uom_id_from_ir_config_parameter() == self.env.ref('uom.product_uom_foot'):
+            dim_unit_name = "inch"
+            dim_unit_divisor = 12
+        else:
+            dim_unit_name = "centimeter"
+            dim_unit_divisor = 100
+
         data = {
             "shipment": {
                 "validate_address": "validate_only" if to_partner_id.ship_address_dirty else "no_validation",
@@ -121,16 +130,14 @@ class DeliveryCarrierApi(models.Model):
                 "packages": [
                     {
                         "weight": {
-                            "value": weight,
-                            # "unit": self.env['product.template']._get_weight_uom_id_from_ir_config_parameter().name
-                            "unit": "ounce"
+                            "unit": weight_unit_name,
+                            "value": weight
                         },
                         "dimensions": {
-                            # "unit": self.env['product.template']._get_length_uom_id_from_ir_config_parameter().name,
-                            "unit": "inch",
-                            "length": length,
-                            "width": width,
-                            "height": height
+                            "unit": dim_unit_name,
+                            "length": length / dim_unit_divisor,
+                            "width": width / dim_unit_divisor,
+                            "height": height / dim_unit_divisor
                         },
                         # "insured_value": {
                         #     "currency": self.env.user.currency_id.name.lower(),
