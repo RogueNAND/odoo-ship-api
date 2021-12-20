@@ -10,20 +10,32 @@ class ResPartner(models.Model):
     ship_live_hash = fields.Char(compute='_compute_ship_address_dirty', store=True)
     ship_address_dirty = fields.Boolean(compute='_compute_ship_address_dirty', store=True)
 
+    @api.model
+    def get_address_hash(self, street: str, street2: str, city: str, state_id: int, zip: str, country_id: int, address_residential: bool):
+        return hash((
+            street or False,
+            street2 or False,
+            city or False,
+            int(state_id or False),
+            zip or False,
+            int(country_id or False),
+            address_residential or False
+        ))
+
     @api.depends('street', 'street2', 'city', 'state_id', 'zip', 'country_id', 'address_residential', 'ship_stored_hash')
     def _compute_ship_address_dirty(self):
         """ Has the address changed since the last verification? """
 
         for partner_id in self:
-            partner_id.ship_live_hash = hash((
+            partner_id.ship_live_hash = self.get_address_hash(
                 partner_id.street,
                 partner_id.street2,
                 partner_id.city,
-                partner_id.state_id.code,
+                partner_id.state_id.id,
                 partner_id.zip,
-                partner_id.country_id.code,
+                partner_id.country_id.id,
                 partner_id.address_residential
-            ))
+            )
             partner_id.ship_address_dirty = partner_id.ship_stored_hash != partner_id.ship_live_hash
 
     def action_verify_ship_address(self):

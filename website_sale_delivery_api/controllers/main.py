@@ -28,6 +28,15 @@ class WebsiteSaleShippingApi(WebsiteSale):
                 )
                 if success:
                     new_values.update(data)
+                    new_values['ship_stored_hash'] = request.env['res.partner'].sudo().get_address_hash(
+                        data.get('street'),
+                        data.get('street2'),
+                        data.get('city'),
+                        data.get('state_id'),
+                        data.get('zip'),
+                        data.get('country_id'),
+                        data.get('address_residential'),
+                    )
                 else:
                     errors['invalid_address'] = message
                     error_msg.append("Could not verify your address. Please check it carefully.")

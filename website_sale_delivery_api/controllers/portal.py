@@ -7,6 +7,8 @@ logger = logging.getLogger(__name__)
 
 class PortalSaleShippingApi(CustomerPortal):
 
+    OPTIONAL_BILLING_FIELDS = CustomerPortal.OPTIONAL_BILLING_FIELDS + ['ship_stored_hash']
+
     def details_form_validate(self, data):
         error, error_message = super().details_form_validate(data)
 
@@ -29,6 +31,15 @@ class PortalSaleShippingApi(CustomerPortal):
                 if success:
                     address_data['zipcode'] = address_data['zip']
                     del address_data['zip']
+                    address_data['ship_stored_hash'] = request.env['res.partner'].sudo().get_address_hash(
+                        address_data.get('street'),
+                        address_data.get('street2'),
+                        address_data.get('city'),
+                        address_data.get('state_id'),
+                        address_data.get('zipcode'),
+                        address_data.get('country_id'),
+                        address_data.get('address_residential'),
+                    )
                     data.update(address_data)
                 else:
                     error['invalid_address'] = message
