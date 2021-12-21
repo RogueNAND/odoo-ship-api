@@ -4,7 +4,11 @@
 
 This module is intended to be a development platform for connecting multiple shipping API's.
 
-Requires the 'product_dimension' module from [OCA/product-attribute](https://github.com/OCA/product-attribute)
+This module is compatible with the 'product_dimension' module from [OCA/product-attribute](https://github.com/OCA/product-attribute),
+but is intended to replace its functionality after installation.
+Once 'delivery_api' is installed, you may uninstall 'product_dimension'
+
+***If you are not already using the 'product_dimension' module to manage dimensions, ALL PRODUCT VOLUME INFORMATION WILL BE LOST! (weight information is safe)***
 
 <h2>Supported API's</h2>
 
@@ -95,3 +99,4 @@ TODO:
 - Identify on Shipping API form view whether it's globally set as 'Test' or 'Production'
 - Possibly cache rates outside of delivery_api
 - Write tests
+- Better management of dimensions when product has multiple varients
