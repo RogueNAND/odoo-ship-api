@@ -46,8 +46,8 @@ class ProductTemplate(models.Model):
     _inherit = 'product.template'
 
     product_length = fields.Float(related="product_variant_ids.product_length", readonly=False, store=True)
-    product_height = fields.Float(related="product_variant_ids.product_height", readonly=False, store=True)
     product_width = fields.Float(related="product_variant_ids.product_width", readonly=False, store=True)
+    product_height = fields.Float(related="product_variant_ids.product_height", readonly=False, store=True)
     dimensional_uom_id = fields.Many2one(related="product_variant_ids.dimensional_uom_id", readonly=False, required=True,
                                          default=lambda self: self._get_length_uom_id_from_ir_config_parameter().id)
 
@@ -63,3 +63,44 @@ class ProductTemplate(models.Model):
 
         for product_id in self.search([('weight', '!=', 0)]):
             product_id.weight_user = product_id.weight
+
+    def action_edit_dimension_multi(self):
+        return {
+            'name': "Bulk Edit Dimensions",
+            'view_mode': 'form',
+            'res_model': 'product.dimension.edit',
+            'context': {
+                'default_product_template_ids': self.ids,
+                'default_dimensional_uom_id': self[0].dimensional_uom_id.id,
+                'default_weight_user_uom_id': self[0].weight_user_uom_id.id,
+            },
+            'type': 'ir.actions.act_window',
+            'target': 'new'
+        }
+
+
+class ProductDimension(models.TransientModel):
+    _name = 'product.dimension.edit'
+    _description = 'Product Dimensions'
+
+    product_template_ids = fields.Many2many('product.template', required=True)
+
+    product_length = fields.Float(related="product_template_ids.product_length", readonly=False, store=True)
+    product_width = fields.Float(related="product_template_ids.product_width", readonly=False, store=True)
+    product_height = fields.Float(related="product_template_ids.product_height", readonly=False, store=True)
+    dimensional_uom_id = fields.Many2one(related="product_template_ids.dimensional_uom_id", readonly=False, required=True,
+                                         default=lambda self: self.product_template_ids._get_length_uom_id_from_ir_config_parameter().id)
+
+    weight_user = fields.Float(related="product_template_ids.weight_user", readonly=False)
+    weight_user_uom_id = fields.Many2one(related="product_template_ids.weight_user_uom_id", readonly=False, required=True,
+                                         default=lambda self: self.product_template_ids._get_weight_uom_id_from_ir_config_parameter().id)
+
+    def action_save(self):
+        self.product_template_ids.write({
+            'product_length': self.product_length,
+            'product_width': self.product_width,
+            'product_height': self.product_height,
+            'dimensional_uom_id': self.dimensional_uom_id.id,
+            'weight_user': self.weight_user,
+            'weight_user_uom_id': self.weight_user_uom_id.id,
+        })

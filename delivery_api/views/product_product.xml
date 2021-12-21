@@ -34,13 +34,15 @@
 
         </field>
     </record>
-
     <record id="product_template_dimensions_view_tree" model="ir.ui.view">
         <field name="name">product.template.dimensions.view.tree</field>
         <field name="model">product.template</field>
         <field name="priority">30</field>
         <field name="arch" type="xml">
             <tree editable="bottom">
+                <header>
+                    <button name="action_edit_dimension_multi" type="object" string="Edit Dimensions"/>
+                </header>
                 <field name="name" readonly="1"/>
                 <field name="default_code" readonly="1" optional="show"/>
                 <field name="product_length"/>
@@ -66,6 +68,39 @@
                 <separator/>
             </xpath>
 
+        </field>
+    </record>
+
+    <record id="product_dimension_view_form" model="ir.ui.view">
+        <field name="name">product.dimension.view.form</field>
+        <field name="model">product.dimension.edit</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <label for="product_length" string="LxWxH"/>
+                            <div class="o_address_format">
+                                L=<field name="product_length" style="width: 15%"/>
+                                W=<field name="product_width" style="width: 15%"/>
+                                H=<field name="product_height" style="width: 15%"/>
+                                <field name="dimensional_uom_id" style="width: 10%" widget="selection"/>
+                            </div>
+                        </group>
+                        <group>
+                            <label for="weight_user"/>
+                            <div>
+                                <field name="weight_user" class="oe_inline"/>
+                                <field name="weight_user_uom_id" class="oe_inline" widget="selection"/>
+                            </div>
+                        </group>
+                    </group>
+                </sheet>
+                <footer>
+                    <button name="action_save" string="Save" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
         </field>
     </record>
 
