@@ -48,9 +48,9 @@
                 <field name="product_length"/>
                 <field name="product_width"/>
                 <field name="product_height"/>
-                <field name="dimensional_uom_id" options="{'no_open': True}"/>
+                <field name="dimensional_uom_id" options="{'no_open': True, 'no_create': True}"/>
                 <field name="weight_user"/>
-                <field name="weight_user_uom_id" options="{'no_open': True}"/>
+                <field name="weight_user_uom_id" options="{'no_open': True, 'no_create': True}"/>
                 <field name="categ_id" readonly="1" optional="hide"/>
             </tree>
         </field>

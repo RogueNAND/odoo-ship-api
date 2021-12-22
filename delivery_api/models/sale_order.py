@@ -52,10 +52,7 @@ class SaleOrderLine(models.Model):
         NOTE: returned dimensions may be smaller than package dimensions
         """
 
-        largest_product_dimension = self.env.ref('uom.product_uom_meter')._compute_quantity(
-            max(self.product_id.mapped('product_dimension_max_m')),
-            self.env['product.template']._get_length_uom_id_from_ir_config_parameter()
-        )
+        largest_product_dimension = max(self.product_id.mapped('product_dimension_max_u'))
         total_weight = sum(
             l.product_id.weight
             for l in self
@@ -78,7 +75,7 @@ class SaleOrderLine(models.Model):
         for line in self:
             p = line.product_id
             for x in range(ceil(line.product_qty)):
-                items.append(Item(p.id, p.product_width_m, p.product_height_m, p.product_length_m, p.weight))
+                items.append(Item(p.id, p.product_width_u, p.product_height_u, p.product_length_u, p.weight))
 
         # Find all packages that items fit in, and store the smallest dimensions it will fit
         packages_dimensions = []
@@ -103,9 +100,9 @@ class SaleOrderLine(models.Model):
         cache_hash = hash((
             tuple(lines.ids),
             tuple(lines.product_id.ids),
-            tuple(lines.product_id.mapped('product_length_m')),
-            tuple(lines.product_id.mapped('product_width_m')),
-            tuple(lines.product_id.mapped('product_height_m')),
+            tuple(lines.product_id.mapped('product_length_u')),
+            tuple(lines.product_id.mapped('product_width_u')),
+            tuple(lines.product_id.mapped('product_height_u')),
             tuple(lines.product_id.mapped('weight')),
             tuple(lines.mapped('product_qty')),
         ))

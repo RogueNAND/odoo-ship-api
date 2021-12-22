@@ -18,6 +18,25 @@
                     </div>
                 </xpath>
 
+                <xpath expr="//div[@id='manage_product_packaging']" position="after">
+                    <div class="col-12 col-lg-6 o_setting_box" id="product_dimension_uom_defaults">
+						<div class="o_setting_right_pane">
+                            <label for="product_dimension_uom_id"/>
+							<div class="text-muted">Default Unit of Measure for product dimensions</div><br/>
+                            <div class="content-group">
+                                <field name="product_dimension_uom_id" widget="selection"/>
+                            </div>
+						</div>
+						<div class="o_setting_right_pane">
+                            <label for="product_weight_uom_id"/>
+							<div class="text-muted">Default Unit of Measure for product weight</div><br/>
+                            <div class="content-group">
+                                <field name="product_weight_uom_id" widget="selection"/>
+                            </div>
+						</div>
+                    </div>
+                </xpath>
+
             </field>
         </record>
 
