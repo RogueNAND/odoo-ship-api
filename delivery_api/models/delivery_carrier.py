@@ -19,7 +19,7 @@ class DeliveryCarrier(models.Model):
             order_id = self.env['sale.order'].browse(order_id)
             currency_id = self.env['res.currency'].browse(self._context['currency_id'])
             result = []
-            for carrier_id in self:
+            for carrier_id in self.sudo():
                 rate = carrier_id.rate_shipment(order_id)
                 if rate['success']:
                     price = rate['price']

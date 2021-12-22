@@ -15,7 +15,7 @@ class DeliveryCarrierApi(models.Model):
     delivery_api = fields.Selection([])
     carrier_ids = fields.One2many('delivery.carrier', 'delivery_api_id', readonly=True)
     api_carrier_ids = fields.One2many('delivery.carrier.api.carrier', 'delivery_api_id', string="Supported Carriers")
-    global_prod_environment = fields.Boolean(compute='_compute_global_prod_environment')
+    global_prod_environment = fields.Boolean(compute='_compute_global_prod_environment', store=True)
     api_key_prod = fields.Char()
     api_key_test = fields.Char()
     currency_id = fields.Many2one('res.currency', required=True, default=lambda self: self.env.company.currency_id.id)
@@ -109,6 +109,7 @@ class DeliveryCarrierApi(models.Model):
         """
 
         self.ensure_one()
+        self = self.sudo()
         if good_service_ids:
             good_service_ids = self.env['delivery.carrier.api.carrier.service'].browse(good_service_ids)
             bad_carrier_ids = active_service_ids.api_carrier_id - good_service_ids.api_carrier_id
@@ -246,4 +247,4 @@ class DeliveryCarrierApi(models.Model):
             to_partner_id.country_id.id,
             length, width, height, weight
         ))
-        return self._rate_estimate(cache_hash, from_partner_id, to_partner_id, length, width, height, weight, log_msg)
+        return self.sudo()._rate_estimate(cache_hash, from_partner_id, to_partner_id, length, width, height, weight, log_msg)
