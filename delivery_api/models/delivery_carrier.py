@@ -43,7 +43,6 @@ class DeliveryCarrier(models.Model):
         else:
             return super().name_get()
 
-
     @api.onchange('delivery_api_id')
     def _onchange_delivery_api_id(self):
         self.api_carrier_id = False
