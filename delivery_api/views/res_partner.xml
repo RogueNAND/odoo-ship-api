@@ -8,9 +8,8 @@
 
             <field name="country_id" position="after">
                 <field name="ship_stored_hash" invisible="1"/>
-                <field name="address_residential" invisible="1"/>
-                <span attrs="{'invisible': ['|', ('ship_address_dirty', '=', True), ('address_residential', '=', False)]}">🏠 Residential</span>
-                <span attrs="{'invisible': ['|', ('ship_address_dirty', '=', True), ('address_residential', '=', True)]}">🏢 Commercial</span>
+                <field name="address_indicator" nolabel="1" attrs="{'invisible': ['|', ('ship_address_dirty', '=', True), ('address_indicator', '=', False)]}"/>
+                <span attrs="{'invisible': ['|', ('ship_address_dirty', '=', True), ('address_indicator', '!=', False)]}">Unknown RDI</span>
                 <field name="ship_address_dirty" invisible="1"/>
                 <button name="action_verify_ship_address" string="Verify Shipping Address" type="object" class="btn-secondary"
                         attrs="{'invisible': ['|', ('ship_address_dirty', '=', False), '&amp;', ('type', '=', 'contact'), ('parent_id', '!=', False)]}"/>

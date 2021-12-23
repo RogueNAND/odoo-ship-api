@@ -20,7 +20,7 @@ class ResPartnerVerify(models.TransientModel):
     street2 = fields.Char(readonly=True)
     city = fields.Char(readonly=True)
     zip = fields.Char(readonly=True)
-    address_residential = fields.Boolean(readonly=True)
+    address_indicator = fields.Selection([('residential', "🏠 Residential"), ('commercial', "🏢 Commercial")], readonly=True)
     state_id = fields.Many2one('res.country.state', readonly=True)
     country_id = fields.Many2one(related='state_id.country_id')
 
@@ -54,6 +54,6 @@ class ResPartnerVerify(models.TransientModel):
             'city': self.city,
             'state_id': self.state_id.id,
             'country_id': self.country_id.id,
-            'address_residential': self.address_residential,
+            'address_indicator': self.address_indicator,
         })
         self.partner_id.ship_stored_hash = self.partner_id.ship_live_hash

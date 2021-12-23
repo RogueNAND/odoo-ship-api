@@ -175,7 +175,7 @@ class DeliveryCarrierApi(models.Model):
             data = result['data']
 
             # Ensure all required return fields are set
-            required_values = {'street', 'street2', 'city', 'state', 'zip', 'country', 'address_residential'}
+            required_values = {'street', 'street2', 'city', 'state', 'zip', 'country', 'address_indicator'}
             returned_values = set(data.keys())
             if required_values != returned_values:
                 raise UserError(_("Address verification did not return correct values:\n\nRequired:\n[%s]\n\nReturned:\n[%s]")

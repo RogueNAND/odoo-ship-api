@@ -62,6 +62,7 @@ class DeliveryCarrierApi(models.Model):
         message = '\n'.join([msg['message'] for msg in message if msg['type'] != 'info'])
         result = result['matched_address']
         if result:
+            address_indicator_map = {'yes': 'residential', 'no': 'commercial'}
             data = {
                 'street': result['address_line1'],
                 'street2': result['address_line2'],
@@ -69,7 +70,7 @@ class DeliveryCarrierApi(models.Model):
                 'state': result['state_province'],
                 'zip': result['postal_code'],
                 'country': result['country_code'],
-                'address_residential': result['address_residential_indicator'] == 'yes'
+                'address_indicator': address_indicator_map.get(result['address_residential_indicator'], False)
             }
             if status == 'verified':
                 return {'success': True, 'data': data, 'user_confirm': False, 'message': message}
@@ -90,6 +91,8 @@ class DeliveryCarrierApi(models.Model):
             dim_unit_name = "centimeter"
             dim_unit_divisor = 100
 
+        to_partner_addr_res = "unknown" if to_partner_id.ship_address_dirty else "yes" if to_partner_id.address_indicator == 'residential' else "no" if to_partner_id.address_indicator == 'commercial' else "unknown"
+        from_partner_addr_res = "unknown" if from_partner_id.ship_address_dirty else "yes" if from_partner_id.address_indicator == 'residential' else "no" if from_partner_id.address_indicator == 'commercial' else "unknown"
         data = {
             "shipment": {
                 "validate_address": "validate_only" if to_partner_id.ship_address_dirty else "no_validation",
@@ -104,7 +107,7 @@ class DeliveryCarrierApi(models.Model):
                     "state_province": to_partner_id.state_id.code or "",
                     "postal_code": to_partner_id.zip or "",
                     "country_code": to_partner_id.country_id.code or "",
-                    "address_residential_indicator": "unknown" if to_partner_id.ship_address_dirty else "yes" if to_partner_id.address_residential else "no"
+                    "address_residential_indicator": to_partner_addr_res
                 },
                 "ship_from": {
                     "name": from_partner_id.display_name or "",
@@ -117,7 +120,7 @@ class DeliveryCarrierApi(models.Model):
                     "state_province": from_partner_id.state_id.code or "",
                     "postal_code": from_partner_id.zip or "",
                     "country_code": from_partner_id.country_id.code or "",
-                    "address_residential_indicator": "unknown" if from_partner_id.ship_address_dirty else "yes" if from_partner_id.address_residential else "no"
+                    "address_residential_indicator": from_partner_addr_res
                 },
                 # "confirmation": "none",
                 # "customs": {

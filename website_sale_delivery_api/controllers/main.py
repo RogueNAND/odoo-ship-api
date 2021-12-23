@@ -35,7 +35,7 @@ class WebsiteSaleShippingApi(WebsiteSale):
                         data.get('state_id'),
                         data.get('zip'),
                         data.get('country_id'),
-                        data.get('address_residential'),
+                        data.get('address_indicator'),
                     )
                 else:
                     errors['invalid_address'] = message

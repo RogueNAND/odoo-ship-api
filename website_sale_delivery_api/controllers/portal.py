@@ -38,7 +38,7 @@ class PortalSaleShippingApi(CustomerPortal):
                         address_data.get('state_id'),
                         address_data.get('zipcode'),
                         address_data.get('country_id'),
-                        address_data.get('address_residential'),
+                        address_data.get('address_indicator'),
                     )
                     data.update(address_data)
                 else:

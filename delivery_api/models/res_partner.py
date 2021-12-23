@@ -5,13 +5,13 @@ from odoo.exceptions import UserError
 class ResPartner(models.Model):
     _inherit = 'res.partner'
 
-    address_residential = fields.Boolean()
+    address_indicator = fields.Selection([('residential', "🏠 Residential"), ('commercial', "🏢 Commercial")], readonly=True)
     ship_stored_hash = fields.Char(readonly=True)
     ship_live_hash = fields.Char(compute='_compute_ship_address_dirty', store=True)
     ship_address_dirty = fields.Boolean(compute='_compute_ship_address_dirty', store=True)
 
     @api.model
-    def get_address_hash(self, street: str, street2: str, city: str, state_id: int, zip: str, country_id: int, address_residential: bool):
+    def get_address_hash(self, street: str, street2: str, city: str, state_id: int, zip: str, country_id: int, address_indicator):
         return hash((
             street or False,
             street2 or False,
@@ -19,10 +19,10 @@ class ResPartner(models.Model):
             int(state_id or False),
             zip or False,
             int(country_id or False),
-            address_residential or False
+            address_indicator or False
         ))
 
-    @api.depends('street', 'street2', 'city', 'state_id', 'zip', 'country_id', 'address_residential', 'ship_stored_hash')
+    @api.depends('street', 'street2', 'city', 'state_id', 'zip', 'country_id', 'address_indicator', 'ship_stored_hash')
     def _compute_ship_address_dirty(self):
         """ Has the address changed since the last verification? """
 
@@ -34,7 +34,7 @@ class ResPartner(models.Model):
                 partner_id.state_id.id,
                 partner_id.zip,
                 partner_id.country_id.id,
-                partner_id.address_residential
+                partner_id.address_indicator
             )
             partner_id.ship_address_dirty = partner_id.ship_stored_hash != partner_id.ship_live_hash
 
