@@ -24,6 +24,8 @@ class ProductProduct(models.Model):
     weight_user = fields.Float("Weight")
     weight = fields.Float("Internal Weight", compute='_compute_product_dimensions', store=True, compute_sudo=True)
 
+    freight_code = fields.Many2one('delivery.freight.code')
+
     @api.depends('product_length', 'product_width', 'product_height', 'dimensional_uom_id', 'weight_user', 'weight_user_uom_id')
     def _compute_product_dimensions(self):
         uom_length_config = self.env['product.template']._get_length_uom_id_from_ir_config_parameter()
@@ -51,6 +53,8 @@ class ProductTemplate(models.Model):
     weight_user = fields.Float(related="product_variant_ids.weight_user", readonly=False)
     weight = fields.Float("Internal Weight", readonly=True)
     volume = fields.Float(readonly=True)
+
+    freight_code = fields.Many2one(related="product_variant_ids.freight_code", readonly=False)
 
     @api.model
     def _initialize_weight_user(self):
@@ -102,6 +106,9 @@ class ProductDimension(models.TransientModel):
     weight_user_uom_id = fields.Many2one(related="product_template_ids.weight_user_uom_id", readonly=False, required=True,
                                          default=lambda self: self.product_template_ids._get_default_weight_user_uom_id().id)
 
+    freight_code = fields.Many2one(related="product_template_ids.freight_code", readonly=False,
+                                   default=lambda self: self.product_template_ids.freight_code.get_maximum().id)
+
     def action_save(self):
         self.product_template_ids.write({
             'product_length': self.product_length,
@@ -110,4 +117,5 @@ class ProductDimension(models.TransientModel):
             'dimensional_uom_id': self.dimensional_uom_id.id,
             'weight_user': self.weight_user,
             'weight_user_uom_id': self.weight_user_uom_id.id,
+            'freight_code': self.freight_code.id
         })

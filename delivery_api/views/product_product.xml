@@ -26,6 +26,7 @@
                     <field name="weight_user" class="oe_inline"/>
                     <field name="weight_user_uom_id" class="oe_inline" widget="selection"/>
                 </div>
+                <field name="freight_code" options="{'no_open': True, 'no_create': True}"/>
             </xpath>
 
             <field name="volume" position="attributes">
@@ -51,6 +52,7 @@
                 <field name="dimensional_uom_id" options="{'no_open': True, 'no_create': True}"/>
                 <field name="weight_user"/>
                 <field name="weight_user_uom_id" options="{'no_open': True, 'no_create': True}"/>
+                <field name="freight_code" options="{'no_open': True, 'no_create': True}" optional="show"/>
                 <field name="categ_id" readonly="1" optional="hide"/>
             </tree>
         </field>
@@ -93,6 +95,7 @@
                                 <field name="weight_user" class="oe_inline"/>
                                 <field name="weight_user_uom_id" class="oe_inline" widget="selection"/>
                             </div>
+                            <field name="freight_code" options="{'no_open': True, 'no_create': True}"/>
                         </group>
                     </group>
                 </sheet>

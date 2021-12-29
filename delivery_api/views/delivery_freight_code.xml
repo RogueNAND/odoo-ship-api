@@ -1,0 +1,15 @@
+<odoo>
+
+    <record id="delivery_freight_code_view_tree" model="ir.ui.view">
+        <field name="name">delivery.freight.code.view.tree</field>
+        <field name="model">delivery.freight.code</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="description"/>
+                <field name="density_minimum"/>
+            </tree>
+        </field>
+    </record>
+
+</odoo>
