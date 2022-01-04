@@ -1,5 +1,5 @@
 from odoo import api, fields, models
-from odoo.exceptions import UserError, ValidationError
+from odoo.exceptions import ValidationError
 
 
 class DeliveryFreightClass(models.Model):
@@ -15,7 +15,7 @@ class DeliveryFreightClass(models.Model):
     @api.constrains('code')
     def _constrain_code(self):
         if self.filtered(lambda x: not (50 <= x.code <= 500)):
-            raise UserError("Freight class must be between 50 and 500")
+            raise ValidationError("Freight class must be between 50 and 500")
 
     @api.depends('code')
     def _compute_name(self):

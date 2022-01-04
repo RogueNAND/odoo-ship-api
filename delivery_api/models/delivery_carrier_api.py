@@ -205,8 +205,6 @@ class DeliveryCarrierApi(models.Model):
         self.ensure_one()
         attr_name = f"{self.delivery_api}_rate_estimate"
         logger.info(*log_msg)
-        if not hasattr(self, attr_name):
-            raise UserError(_("%s does not have the ability to verify addresses") % self.delivery_api)
 
         active_service_ids = self.carrier_ids.service_id
         service_rate_map = getattr(self, attr_name)(from_partner_id, to_partner_id, length, width, height, weight, active_service_ids)
