@@ -20,15 +20,13 @@ class DeliveryCarrierApi(models.Model):
     api_key_test = fields.Char()
     currency_id = fields.Many2one('res.currency', required=True, default=lambda self: self.env.company.currency_id.id)
 
-    supports_test_environment = fields.Boolean(string="Sandbox Environment", compute='_compute_api_features', store=True,
-                                               help="Test your shipping integration before using it in production")
-    supports_address_validation = fields.Boolean(string="Address Validation", compute='_compute_api_features', store=True,
-                                                 help="Validate partner addresses before shipment")
-    supports_tracking = fields.Boolean(string="Realtime Tracking", compute='_compute_api_features', store=True,
-                                       help="Get realtime tracking updates for shipments")
-    supports_insurance = fields.Boolean(string="Insurance", compute='_compute_api_features', store=True, help="Insure your shipments")
-    supports_returns = fields.Boolean(string="Returns", compute='_compute_api_features', store=True, help="Generate return labels automatically")
-    supports_ltl = fields.Boolean(string="LTL", compute='_compute_api_features', store=True, help="Less than Truck Load")
+    supports_test_environment = fields.Boolean(string="Sandbox Environment", compute='_compute_api_features', help="Test your shipping integration before using it in production")
+    supports_address_validation = fields.Boolean(string="Address Validation", compute='_compute_api_features', help="Validate partner addresses before shipment")
+    supports_tracking = fields.Boolean(string="Realtime Tracking", compute='_compute_api_features', help="Get realtime tracking updates for shipments")
+    supports_insurance = fields.Boolean(string="Insurance", compute='_compute_api_features', help="Insure your shipments")
+    supports_returns = fields.Boolean(string="Returns", compute='_compute_api_features', help="Generate return labels automatically")
+    supports_ltl = fields.Boolean(string="LTL", compute='_compute_api_features', help="Less than Truck Load")
+
     possible_outage_detected = fields.Boolean()
     last_cache_clear_time = fields.Datetime(default=lambda x: fields.Datetime.now())
 
@@ -38,7 +36,6 @@ class DeliveryCarrierApi(models.Model):
             # Only disable global_prod_environment if ALL linked carrier_ids are test environments
             api.global_prod_environment = bool(api.carrier_ids.filtered('prod_environment'))
 
-    @api.depends('delivery_api')
     def _compute_api_features(self):
         self.supports_test_environment = False
         self.supports_address_validation = False
