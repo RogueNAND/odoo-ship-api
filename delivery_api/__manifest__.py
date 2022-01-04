@@ -6,7 +6,7 @@
     'website': "https://github.com/RogueNAND/odoo-ship-api",
     'category': 'Inventory/Delivery',
     'application': False,
-    'version': '14.0.2.4.2',
+    'version': '14.0.2.5.0',
     'depends': ['delivery'],
     'data': [
         'security/ir.model.access.csv',
