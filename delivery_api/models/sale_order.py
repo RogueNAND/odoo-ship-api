@@ -42,6 +42,25 @@ def find_height(items, items_volume, length, width, min_height, max_height):
         return _find_height(items, items_volume, iteration_count, length, width, min_height, max_height)
 
 
+class SaleOrder(models.Model):
+    _inherit = 'sale.order'
+
+    def update_prices(self):
+        """ Updating the pricelist should not override delivery prices """
+
+        delivery_product_ids = self.env['delivery.carrier'].search([
+            '|', ('company_id', '=', False), ('company_id', '=', self.company_id.id)
+        ]).product_id
+        delivery_line_price_map = {
+            line: line.price_unit
+            for line in self.order_line.filtered(lambda x: x.is_delivery or x.product_id in delivery_product_ids)
+        }
+        result = super().update_prices()
+        for line, price_unit in delivery_line_price_map.items():
+            line.price_unit = price_unit
+        return result
+
+
 class SaleOrderLine(models.Model):
     _inherit = 'sale.order.line'
 
