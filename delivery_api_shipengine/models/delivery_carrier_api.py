@@ -1,5 +1,4 @@
 from odoo import fields, models, _
-from odoo.tools import float_round
 from odoo.exceptions import UserError
 import json, requests
 
@@ -9,9 +8,9 @@ class DeliveryCarrierApi(models.Model):
 
     delivery_api = fields.Selection(selection_add=[('shipengine', 'Ship Engine')], ondelete={'shipengine': 'set null'})
 
-    def _shipengine_call(self, prod_environment, endpoint, request_type='GET', data=None):
-        url = f"https://api.shipengine.com/v1/{endpoint.lstrip('/')}"
-        api_key = self.api_key_prod if prod_environment else self.api_key_test
+    def _shipengine_call(self, use_prod_environment: bool, endpoint, request_type='GET', data=None):
+        url = f"https://api.shipengine.com/{endpoint.lstrip('/')}"
+        api_key = self.api_key_prod if use_prod_environment else self.api_key_test
         if not api_key:
             raise UserError(_("API key for %s has not been configured yet") % self.name)
         headers = {
@@ -22,7 +21,7 @@ class DeliveryCarrierApi(models.Model):
         return requests.request(request_type, url, headers=headers, data=json.dumps(data or {})).json()
 
     def shipengine_sync(self):
-        data = self._shipengine_call(bool(self.api_key_prod), "/carriers", 'GET')
+        data = self._shipengine_call(bool(self.api_key_prod), "/v1/carriers", 'GET')
         return [
             {
                 'code': carrier['carrier_id'],
@@ -55,7 +54,7 @@ class DeliveryCarrierApi(models.Model):
             "postal_code": zip,
             "country_code": country_code,
         }]
-        result = self._shipengine_call(self.global_prod_environment, '/addresses/validate', request_type='POST', data=data)[0]
+        result = self._shipengine_call(self.global_prod_environment, '/v1/addresses/validate', 'POST', data=data)[0]
 
         status = result['status']
         message = result.get('messages') or []
@@ -160,7 +159,7 @@ class DeliveryCarrierApi(models.Model):
                 "preferred_currency": self.currency_id.name.lower()
             }
         }
-        response = self._shipengine_call(self.global_prod_environment, '/rates', request_type='POST', data=data)
+        response = self._shipengine_call(self.global_prod_environment, '/v1/rates', 'POST', data=data)
         rates = response.get('rate_response', {}).get('rates', [])
         return {
             code_service_map[rate['service_code']]: (rate['shipping_amount']['amount'], '; '.join(rate['warning_messages']), '; '.join(rate['error_messages']))
