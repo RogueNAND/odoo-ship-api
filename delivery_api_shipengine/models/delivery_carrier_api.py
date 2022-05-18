@@ -40,7 +40,6 @@ class DeliveryCarrierApi(models.Model):
         self.supports_tracking = False
         self.supports_insurance = False
         self.supports_returns = False
-        self.supports_ltl = True
 
     def shipengine_verify_address(self, name, company_name, phone, street, street2, city, state_code, zip, country_code):
         data = [{
@@ -80,47 +79,15 @@ class DeliveryCarrierApi(models.Model):
         else:
             return {'success': False, 'message': message}
 
-    def shipengine_rate_estimate(self, from_partner_id, to_partner_id, length, width, height, weight, active_service_ids):
-        code_service_map = {service_id.code: service_id.id for service_id in active_service_ids}
-        weight_unit_name = "pound" if self.env['product.template']._get_weight_uom_id_from_ir_config_parameter() == self.env.ref('uom.product_uom_lb') else "kilogram"
-        if self.env['product.template']._get_length_uom_id_from_ir_config_parameter() == self.env.ref('uom.product_uom_foot'):
-            dim_unit_name = "inch"
-            dim_unit_divisor = 12
-        else:
-            dim_unit_name = "centimeter"
-            dim_unit_divisor = 100
+    def _shipengine_rate_estimate(self, from_partner_id, to_partner_id, length, width, height, weight, attributes, active_service_ids):
+        to_addr = to_partner_id.shipengine_get_address()
+        from_addr = from_partner_id.shipengine_get_address()
 
-        to_partner_addr_res = "unknown" if to_partner_id.ship_address_dirty else "yes" if to_partner_id.address_indicator == 'residential' else "no" if to_partner_id.address_indicator == 'commercial' else "unknown"
-        from_partner_addr_res = "unknown" if from_partner_id.ship_address_dirty else "yes" if from_partner_id.address_indicator == 'residential' else "no" if from_partner_id.address_indicator == 'commercial' else "unknown"
         data = {
             "shipment": {
                 "validate_address": "validate_only" if to_partner_id.ship_address_dirty else "no_validation",
-                "ship_to": {
-                    "name": to_partner_id.display_name or "",
-                    "phone": to_partner_id.phone or to_partner_id.mobile or to_partner_id.parent_id.phone or to_partner_id.parent_id.mobile or "",
-                    "company_name": to_partner_id.parent_id.name or "",
-                    "address_line1": to_partner_id.street or "",
-                    "address_line2": to_partner_id.street2 or "",
-                    "address_line3": "",
-                    "city_locality": to_partner_id.city or "",
-                    "state_province": to_partner_id.state_id.code or "",
-                    "postal_code": to_partner_id.zip or "",
-                    "country_code": to_partner_id.country_id.code or "",
-                    "address_residential_indicator": to_partner_addr_res
-                },
-                "ship_from": {
-                    "name": from_partner_id.display_name or "",
-                    "phone": from_partner_id.phone or from_partner_id.mobile or from_partner_id.parent_id.phone or from_partner_id.parent_id.mobile or "",
-                    "company_name": from_partner_id.parent_id.name or from_partner_id.name or "",
-                    "address_line1": from_partner_id.street or "",
-                    "address_line2": from_partner_id.street2 or "",
-                    "address_line3": "",
-                    "city_locality": from_partner_id.city or "",
-                    "state_province": from_partner_id.state_id.code or "",
-                    "postal_code": from_partner_id.zip or "",
-                    "country_code": from_partner_id.country_id.code or "",
-                    "address_residential_indicator": from_partner_addr_res
-                },
+                "ship_to": to_addr,
+                "ship_from": from_addr,
                 # "confirmation": "none",
                 # "customs": {
                 #     "contents": "merchandise",
@@ -132,14 +99,14 @@ class DeliveryCarrierApi(models.Model):
                 "packages": [
                     {
                         "weight": {
-                            "unit": weight_unit_name,
+                            "unit": "pound",
                             "value": weight
                         },
                         "dimensions": {
-                            "unit": dim_unit_name,
-                            "length": length / dim_unit_divisor,
-                            "width": width / dim_unit_divisor,
-                            "height": height / dim_unit_divisor
+                            "unit": "inch",
+                            "length": length,
+                            "width": width,
+                            "height": height
                         },
                         # "insured_value": {
                         #     "currency": self.env.user.currency_id.name.lower(),
@@ -154,15 +121,32 @@ class DeliveryCarrierApi(models.Model):
                 ]
             },
             "rate_options": {
-                'carrier_ids': self.api_carrier_ids.mapped('code'),
+                'carrier_ids': active_service_ids.api_carrier_id.mapped('code'),
                 "service_codes": active_service_ids.mapped('code'),
                 "preferred_currency": self.currency_id.name.lower()
             }
         }
         response = self._shipengine_call(self.global_prod_environment, '/v1/rates', 'POST', data=data)
         rates = response.get('rate_response', {}).get('rates', [])
+        code_service_map = {service_id.code: service_id.id for service_id in active_service_ids}
         return {
-            code_service_map[rate['service_code']]: (rate['shipping_amount']['amount'], '; '.join(rate['warning_messages']), '; '.join(rate['error_messages']))
+            code_service_map[rate['service_code']]: (
+            rate['shipping_amount']['amount'], '; '.join(rate['warning_messages']), '; '.join(rate['error_messages']))
             for rate in rates
             if rate.get('service_code') in code_service_map
         }
+
+    def shipengine_rate_estimate(self, from_partner_id, to_partner_id, length, width, height, weight, attributes, active_service_ids):
+        if self.env['product.template']._get_length_uom_id_from_ir_config_parameter() == self.env.ref('uom.product_uom_foot'):
+            length = round(max(length * 12, 1))
+            width = round(max(width * 12, 1))
+            height = round(max(height * 12, 1))
+        else:
+            length = round(max(length * 39.37, 1))
+            width = round(max(width * 39.37, 1))
+            height = round(max(height * 39.37, 1))
+
+        origin_weight_uom = self.env['product.template']._get_weight_uom_id_from_ir_config_parameter()
+        weight = round(max(origin_weight_uom._compute_quantity(weight, self.env.ref('uom.product_uom_lb')), 1))
+
+        return self._shipengine_rate_estimate(from_partner_id, to_partner_id, length, width, height, weight, attributes, active_service_ids)
