@@ -59,6 +59,11 @@ class DeliveryCarrierApi(models.Model):
             api_ids.possible_outage_detected = False
             api_ids.last_cache_clear_time = now
 
+    def action_view_shipping_methods(self):
+        action = self.env.ref('delivery.action_delivery_carrier_form').read()[0]
+        action['domain'] = [('delivery_api_id', '=', self.id)]
+        return action
+
     @api.model
     def compare_address_diff(self, old_street: str, old_street2: str, old_city: str, old_state: str, old_zip: str, old_country: str,
                              new_street: str, new_street2: str, new_city: str, new_state: str, new_zip: str, new_country: str):

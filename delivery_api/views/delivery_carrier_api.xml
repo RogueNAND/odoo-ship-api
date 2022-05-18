@@ -33,6 +33,11 @@
                     <button name="action_sync" string="Sync Data with API" type="object" class="oe_highlight"/>
                 </header>
                 <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_shipping_methods" type="object" class="oe_stat_button" icon="fa-truck">
+                            <field string="Methods" name="carrier_ids" widget="statinfo"/>
+                        </button>
+                    </div>
                     <div class="oe_title">
                         <h1>
                             <field name="name"/>
