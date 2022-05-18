@@ -26,12 +26,13 @@
                         </h1>
                     </div>
                     <group>
-                        <group>
+                        <group name="main">
                             <field name="usable" widget="boolean_toggle"/>
                             <field name="code"/>
-                            <field name="ltl"/>
+                            <field name="freight_type"/>
                         </group>
-                        <field name="delivery_api_id"/>
+                        <field name="delivery_api" invisible="1"/>
+                        <field name="delivery_api_id" invisible="1"/>
                     </group>
                 </sheet>
             </form>
@@ -44,7 +45,7 @@
             <tree>
                 <field name="name"/>
                 <field name="code"/>
-                <field name="ltl"/>
+                <field name="freight_type"/>
                 <field name="delivery_api_id"/>
                 <field name="usable" widget="boolean_toggle"/>
             </tree>
@@ -57,7 +58,8 @@
             <search string="delivery_carrier_api_carrier">
                 <field name="name"/>
                 <field name="code"/>
-                <filter string="LTL" name="ltl" domain="[('ltl', '=', True)]"/>
+                <filter string="Less Than Truckload" name="ltl" domain="[('freight_type', '=', 'ltl')]"/>
+                <filter string="Full Truckload" name="ftl" domain="[('freight_type', '=', 'ftl')]"/>
                 <group expand="0" string="Group By">
                     <filter name="group_delivery_api_id" string="Delivery API" context="{'group_by': 'delivery_api_id'}"/>
                 </group>

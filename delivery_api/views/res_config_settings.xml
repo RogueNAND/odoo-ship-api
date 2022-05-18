@@ -15,6 +15,13 @@
                                 <field name="address_verify_ship_api_id"/>
                             </div>
 						</div>
+						<div class="o_setting_right_pane">
+                            <label for="delivery_default_freight_code"/>
+							<div class="text-muted">Default Freight Class to use for unclassed LTL shipments</div><br/>
+                            <div class="content-group">
+                                <field name="delivery_default_freight_code" required="1"/>
+                            </div>
+						</div>
                     </div>
                 </xpath>
 

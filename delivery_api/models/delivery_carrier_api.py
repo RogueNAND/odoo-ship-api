@@ -25,7 +25,6 @@ class DeliveryCarrierApi(models.Model):
     supports_tracking = fields.Boolean(string="Realtime Tracking", compute='_compute_api_features', help="Get realtime tracking updates for shipments")
     supports_insurance = fields.Boolean(string="Insurance", compute='_compute_api_features', help="Insure your shipments")
     supports_returns = fields.Boolean(string="Returns", compute='_compute_api_features', help="Generate return labels automatically")
-    supports_ltl = fields.Boolean(string="LTL", compute='_compute_api_features', help="Less than Truck Load")
 
     possible_outage_detected = fields.Boolean()
     last_cache_clear_time = fields.Datetime(default=lambda x: fields.Datetime.now())
@@ -42,7 +41,6 @@ class DeliveryCarrierApi(models.Model):
         self.supports_tracking = False
         self.supports_insurance = False
         self.supports_returns = False
-        self.supports_ltl = False
         for record in self.filtered('delivery_api'):
             getattr(record, '%s_supports' % record.delivery_api)()
 
@@ -199,21 +197,23 @@ class DeliveryCarrierApi(models.Model):
             return False, result.get('message', False), False, {}
 
     @ormcache('self.carrier_ids.service_id', 'self.carrier_ids.service_id', 'cache_hash')
-    def _rate_estimate(self, cache_hash, from_partner_id, to_partner_id, length, width, height, weight, log_msg):
+    def _rate_estimate(self, cache_hash, from_partner_id, to_partner_id, length, width, height, weight, attributes, log_msg):
         """ Log message, call api, check for outage, and cache result """
 
         self.ensure_one()
         attr_name = f"{self.delivery_api}_rate_estimate"
         logger.info(*log_msg)
 
-        active_service_ids = self.carrier_ids.service_id
-        service_rate_map = getattr(self, attr_name)(from_partner_id, to_partner_id, length, width, height, weight, active_service_ids)
+        force_freight = bool(attributes['freight_package'])
+        active_service_ids = self.carrier_ids.service_id.filtered(lambda x: bool(x.api_carrier_id.freight_type) == force_freight)
+        service_rate_map = getattr(self, attr_name)(from_partner_id, to_partner_id, length, width, height, weight, attributes, active_service_ids) or {}
         self.detect_outage(active_service_ids, [service for service, rate in service_rate_map.items() if rate[0] and not rate[2]])
         return service_rate_map
 
     def rate_estimate(self, from_partner_id, to_partner_id, order_line_ids):
         self.ensure_one()
 
+        order_line_ids = order_line_ids.filtered(lambda x: x.product_qty > 0 and x.product_id.type in ['product', 'consu'])
         package_id, length, width, height, weight = order_line_ids.estimate_package()
         if not package_id:
             return {
@@ -221,10 +221,16 @@ class DeliveryCarrierApi(models.Model):
                 for service_id in self.api_carrier_ids.service_ids
             }
 
-        log_msg = ("%s: Getting rate estimate from partner_id [%s] to [%s] for products %s in order %s. Chosen package: '%s' (%fx%fx%f%s, max %f%s)",
+        log_msg = ("%s: Getting rate estimate from partner_id [%s] to [%s] for products %s in order %s. Chosen package: '%s' (%fx%fx%f%s, max %f%s; Freight=%s)",
                    self.name, from_partner_id.id, to_partner_id.id, order_line_ids.product_id.ids, order_line_ids.order_id.ids,
-                   package_id.name, length, width, height, package_id.length_uom_name, weight, package_id.weight_uom_name)
+                   package_id.name, length, width, height, package_id.length_uom_name, weight, package_id.weight_uom_name, package_id.freight_package_type)
 
+        attributes = {
+            'freight_package': package_id.freight_package_type,
+            'perishable': any(order_line_ids.product_id.mapped('shipping_perishable')),
+            'hazardous': any(order_line_ids.product_id.mapped('shipping_hazardous')),
+            'freight_class': order_line_ids.product_id.freight_code.get_code_for_shipping(),
+        }
         cache_hash = hash((
             from_partner_id.id,
             (from_partner_id.street or "").strip().upper(),
@@ -240,6 +246,7 @@ class DeliveryCarrierApi(models.Model):
             to_partner_id.state_id.id,
             (to_partner_id.zip or "").strip().upper(),
             to_partner_id.country_id.id,
-            length, width, height, weight
+            length, width, height, weight,
+            *attributes.values(),
         ))
-        return self.sudo()._rate_estimate(cache_hash, from_partner_id, to_partner_id, length, width, height, weight, log_msg)
+        return self.sudo()._rate_estimate(cache_hash, from_partner_id, to_partner_id, length, width, height, weight, attributes, log_msg)

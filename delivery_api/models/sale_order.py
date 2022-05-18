@@ -1,5 +1,6 @@
 from odoo import models
 from odoo.tools import ormcache
+from collections import defaultdict
 from math import ceil
 from py3dbp import Packer, Bin, Item
 
@@ -115,18 +116,31 @@ class SaleOrderLine(models.Model):
         return package[0].id, package[1], package[2], package[3], total_weight
 
     def estimate_package(self):
-        lines = self.filtered(lambda x: x.product_qty > 0 and x.product_id.type in ['product', 'consu'])
+        line_ids = self.filtered(lambda x:
+                                 x.product_id
+                                 and x.product_qty > 0
+                                 and x.product_id.type in ['product', 'consu']
+                                 and any(
+                                     (x.product_id.product_length_u,
+                                      x.product_id.product_width_u,
+                                      x.product_id.product_height_u,
+                                      x.product_id.weight)
+                                 ))
+        product_ids = line_ids.product_id.sorted('id')
+
+        product_counts = defaultdict(float)
+        for line in line_ids:
+            product_counts[line.product_id.id] += line.product_qty
+
         cache_hash = hash((
-            tuple(lines.ids),
-            tuple(lines.product_id.ids),
-            tuple(lines.product_id.mapped('product_length_u')),
-            tuple(lines.product_id.mapped('product_width_u')),
-            tuple(lines.product_id.mapped('product_height_u')),
-            tuple(lines.product_id.mapped('weight')),
-            tuple(lines.mapped('product_qty')),
+            tuple(sorted(product_counts.items(), key=lambda x: x[0])),
+            tuple(product_ids.mapped('product_length_u')),
+            tuple(product_ids.mapped('product_width_u')),
+            tuple(product_ids.mapped('product_height_u')),
+            tuple(product_ids.mapped('weight')),
         ))
 
-        package_id, length, width, height, weight = lines._estimate_package(cache_hash)
+        package_id, length, width, height, weight = line_ids._estimate_package(cache_hash)
         package_id = self.env['product.packaging'].browse(package_id)
 
         return package_id, length, width, height, weight

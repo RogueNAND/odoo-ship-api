@@ -7,6 +7,7 @@
         <field name="arch" type="xml">
 
             <xpath expr="//label[@for='height']" position="before">
+                <field name="freight_package_type" attrs="{'invisible': [('package_carrier_type', '!=', 'ship_api')]}"/>
                 <field name="variable_dimensions" attrs="{'invisible': [('package_carrier_type', '!=', 'ship_api')]}"/>
             </xpath>
 

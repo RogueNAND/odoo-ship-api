@@ -8,7 +8,11 @@ class DeliveryCarrierApiCarrier(models.Model):
     code = fields.Char(required=True, readonly=True)
     name = fields.Char(required=True, readonly=True)
     usable = fields.Boolean(help="Allows this carrier to be shown or hidden when creating a shipping method")
-    ltl = fields.Boolean(string="LTL", help="Less then TruckLoad", readonly=True)
+    freight_type = fields.Selection([
+        ('ltl', "Less Than Truckload"),
+        ('ftl', "Full Truckload")
+    ], readonly=True)
+    delivery_api = fields.Selection(related='delivery_api_id.delivery_api', string="API")
     delivery_api_id = fields.Many2one('delivery.carrier.api', required=True, ondelete='cascade', readonly=True)
     service_ids = fields.One2many('delivery.carrier.api.carrier.service', 'api_carrier_id', readonly=True)
 

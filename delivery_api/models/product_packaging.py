@@ -6,6 +6,12 @@ class ProductPackaging(models.Model):
     _inherit = 'product.packaging'
 
     package_carrier_type = fields.Selection(selection_add=[('ship_api', 'Shipping API')], ondelete={'ship_api': 'set default'})
+    freight_package_type = fields.Selection([
+        ('box', "Box"),
+        ('crate', "Crate"),
+        ('pallet', "Pallet"),
+        ('conex', "Conex")
+    ], string="Freight Package")
     height = fields.Float()
     variable_dimensions = fields.Boolean(string="Variable Height")
     min_height = fields.Float("Minimum Height")

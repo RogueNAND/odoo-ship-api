@@ -36,4 +36,12 @@ class DeliveryFreightClass(models.Model):
             return self
         return self.sorted('code', reverse=True)[0]
 
+    def get_code_for_shipping(self):
+        code = self.get_maximum().code
+        if not code:
+            fallback = self.env['ir.config_parameter'].sudo().get_param('delivery.default_freight_code')
+            if fallback:
+                code = self.browse(int(fallback)).code
+        return code or None
+
     _sql_constraints = [('code_unique', 'unique(code)', 'Freight Class already exists')]

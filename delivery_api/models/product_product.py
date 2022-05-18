@@ -24,7 +24,7 @@ class ProductProduct(models.Model):
     weight_user = fields.Float("Weight")
     weight = fields.Float("Internal Weight", compute='_compute_product_dimensions', store=True, compute_sudo=True)
 
-    freight_code = fields.Many2one('delivery.freight.code')
+    freight_code = fields.Many2one('delivery.freight.code', string="Freight Class")
 
     shipping_hazardous = fields.Boolean("Hazardous", help="Examples include:\n\n"
                                                           "Lithium-ion batteries\n"

@@ -60,7 +60,6 @@
                             <field name="supports_tracking"/>
                             <field name="supports_insurance"/>
                             <field name="supports_returns"/>
-                            <field name="supports_ltl"/>
                         </group>
                     </group>
                 </sheet>
@@ -78,7 +77,6 @@
                 <field name="supports_tracking"/>
                 <field name="supports_insurance"/>
                 <field name="supports_returns"/>
-                <field name="supports_ltl"/>
             </tree>
         </field>
     </record>

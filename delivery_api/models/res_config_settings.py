@@ -11,3 +11,5 @@ class ResConfigSettings(models.TransientModel):
     product_dimension_uom_id = fields.Many2one('uom.uom', domain=lambda self: [("category_id", "=", self.env.ref("uom.uom_categ_length").id)],
                                                string="Default Dimension UoM",
                                                config_parameter='product.default_dimension_uom_id')
+    delivery_default_freight_code = fields.Many2one('delivery.freight.code', string="Fallback freight class when none exists",
+                                                    config_parameter='delivery.default_freight_code')
