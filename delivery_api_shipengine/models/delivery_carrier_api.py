@@ -133,7 +133,7 @@ class DeliveryCarrierApi(models.Model):
             code_service_map[rate['service_code']]: (
             rate['shipping_amount']['amount'], '; '.join(rate['warning_messages']), '; '.join(rate['error_messages']))
             for rate in rates
-            if rate.get('service_code') in code_service_map
+            if rate.get('service_code') in code_service_map and rate.get('package_type', None) in ['package', None]
         }
 
     def shipengine_rate_estimate(self, from_partner_id, to_partner_id, length, width, height, weight, attributes, active_service_ids):
