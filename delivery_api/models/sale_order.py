@@ -72,6 +72,9 @@ class SaleOrderLine(models.Model):
         NOTE: returned dimensions may be smaller than package dimensions
         """
 
+        if not self.product_id:
+            return self.env['product.packaging'], 0, 0, 0, 0
+
         largest_product_dimension = max(self.product_id.mapped('product_dimension_max_u'))
         total_weight = sum(
             l.product_id.weight
