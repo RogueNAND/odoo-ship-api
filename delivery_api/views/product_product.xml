@@ -1,7 +1,7 @@
 <odoo>
 
     <record id="product_template_form_view" model="ir.ui.view">
-        <field name="name">product.remplate.ship.api.view.form</field>
+        <field name="name">product.template.ship.api.view.form</field>
         <field name="model">product.template</field>
         <field name="inherit_id" ref="product.product_template_form_view"/>
         <field name="arch" type="xml">
@@ -37,30 +37,6 @@
 
         </field>
     </record>
-    <record id="product_template_dimensions_view_tree" model="ir.ui.view">
-        <field name="name">product.template.dimensions.view.tree</field>
-        <field name="model">product.template</field>
-        <field name="priority">30</field>
-        <field name="arch" type="xml">
-            <tree editable="bottom" multi_edit="1" create="false">
-                <header>
-                    <button name="action_edit_dimension_multi" type="object" string="Edit Dimensions"/>
-                </header>
-                <field name="name" readonly="1"/>
-                <field name="default_code" readonly="1" optional="show"/>
-                <field name="product_length"/>
-                <field name="product_width"/>
-                <field name="product_height"/>
-                <field name="dimensional_uom_id" options="{'no_open': True, 'no_create': True}"/>
-                <field name="weight_user"/>
-                <field name="weight_user_uom_id" options="{'no_open': True, 'no_create': True}"/>
-                <field name="freight_code" options="{'no_open': True, 'no_create': True}" optional="show"/>
-                <field name="shipping_hazardous"/>
-                <field name="shipping_perishable"/>
-                <field name="categ_id" readonly="1" optional="hide"/>
-            </tree>
-        </field>
-    </record>
     <record id="product_template_search" model="ir.ui.view">
         <field name="name">product.template.ship.api.search</field>
         <field name="model">product.template</field>
@@ -77,15 +53,40 @@
 
         </field>
     </record>
-    <record id="product_template_dimensions_search" model="ir.ui.view">
-        <field name="name">product.template.dimensions.search</field>
-        <field name="model">product.template</field>
+    <record id="product_product_dimensions_view_tree" model="ir.ui.view">
+        <field name="name">product.product.dimensions.view.tree</field>
+        <field name="model">product.product</field>
+        <field name="priority">30</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom" multi_edit="1" create="false">
+                <header>
+                    <button name="action_edit_dimension_multi" type="object" string="Edit Dimensions"/>
+                </header>
+                <field name="name" readonly="1"/>
+                <field name="default_code" readonly="1" optional="show"/>
+                <field name="product_template_attribute_value_ids" readonly="1" widget="many2many_tags"/>
+                <field name="product_length"/>
+                <field name="product_width"/>
+                <field name="product_height"/>
+                <field name="dimensional_uom_id" options="{'no_open': True, 'no_create': True}"/>
+                <field name="weight_user"/>
+                <field name="weight_user_uom_id" options="{'no_open': True, 'no_create': True}"/>
+                <field name="freight_code" options="{'no_open': True, 'no_create': True}" optional="show"/>
+                <field name="shipping_hazardous"/>
+                <field name="shipping_perishable"/>
+                <field name="categ_id" readonly="1" optional="hide"/>
+            </tree>
+        </field>
+    </record>
+    <record id="product_product_dimensions_search" model="ir.ui.view">
+        <field name="name">product.product.dimensions.search</field>
+        <field name="model">product.product</field>
         <field name="inherit_id" ref="product.product_template_search_view"/>
         <field name="mode">primary</field>
         <field name="arch" type="xml">
 
             <xpath expr="//field[@name='name']" position="replace">
-                <field name="name" string="Product" filter_domain="['|', ('default_code', 'ilike', self), ('product_variant_ids.default_code', 'ilike', self)]"/>
+                <field name="name" string="Product" filter_domain="['|', ('default_code', 'ilike', self), ('product_tmpl_id.default_code', 'ilike', self)]"/>
             </xpath>
 
             <xpath expr="//filter[@name='activities_exception']" position="before">
@@ -95,6 +96,10 @@
                 <filter string="Hazardous" name="shipping_hazardous" domain="[('shipping_hazardous', '=', True)]"/>
                 <filter string="Perishable" name="shipping_perishable" domain="[('shipping_perishable', '=', True)]"/>
                 <separator/>
+            </xpath>
+
+            <xpath expr="//filter[@name='categ_id']" position="after">
+                <filter string="Product Template" name="product_tmpl_id" context="{'group_by':'product_tmpl_id'}"/>
             </xpath>
 
         </field>
@@ -139,20 +144,58 @@
     </record>
 
     <!-- Product template dimensions -->
-    <record id="product_template_dimensions_menu_action" model="ir.actions.act_window">
+    <record id="product_product_dimensions_menu_action" model="ir.actions.act_window">
         <field name="name">Product Dimensions</field>
-        <field name="res_model">product.template</field>
+        <field name="res_model">product.product</field>
         <field name="domain" eval="[]"/>
         <field name="context" eval="{'search_default_need_dimensions': True}"/>
         <field name="view_mode">tree</field>
-        <field name="view_id" ref="delivery_api.product_template_dimensions_view_tree"/>
-        <field name="search_view_id" ref="delivery_api.product_template_dimensions_search"/>
+        <field name="view_id" ref="delivery_api.product_product_dimensions_view_tree"/>
+        <field name="search_view_id" ref="delivery_api.product_product_dimensions_search"/>
         <field name="help" type="html"><p class="o_view_nocontent_smiling_face">No Dimensions to Resolve</p></field>
     </record>
-    <menuitem id="product_template_dimensions_menu"
+    <menuitem id="product_product_dimensions_menu"
               parent="delivery.menu_delivery"
               name="Product Dimensions"
-              action="product_template_dimensions_menu_action"
+              action="product_product_dimensions_menu_action"
               sequence="20"/>
+
+    <record id="product_variant_easy_edit_view" model="ir.ui.view">
+        <field name="name">product.product.view.form.easy.ship.api</field>
+        <field name="model">product.product</field>
+        <field name="inherit_id" ref="product.product_variant_easy_edit_view"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//label[@for='weight']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='weight']/.." position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <xpath expr="//label[@for='volume']" position="before">
+                <label for="product_length" string="LxWxH"/>
+                <div class="o_address_format">
+                    L=<field name="product_length" style="width: 15%"/>
+                    W=<field name="product_width" style="width: 15%"/>
+                    H=<field name="product_height" style="width: 15%"/>
+                    <field name="dimensional_uom_id" style="width: 10%" widget="selection"/>
+                </div>
+                <label for="weight_user"/>
+                <div>
+                    <field name="weight_user" class="oe_inline"/>
+                    <field name="weight_user_uom_id" class="oe_inline" widget="selection"/>
+                </div>
+                <field name="freight_code" options="{'no_open': True, 'no_create': True}"/>
+                <field name="shipping_hazardous"/>
+                <field name="shipping_perishable"/>
+            </xpath>
+
+            <field name="volume" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </field>
+
+        </field>
+    </record>
 
 </odoo>

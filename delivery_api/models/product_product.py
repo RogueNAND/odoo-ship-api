@@ -47,6 +47,20 @@ class ProductProduct(models.Model):
             product.volume = product.product_length_u * product.product_width_u * product.product_height_u
             product.weight = product.weight_user_uom_id._compute_quantity(product.weight_user, uom_weight_config)
 
+    def action_edit_dimension_multi(self):
+        return {
+            'name': "Bulk Edit Dimensions",
+            'view_mode': 'form',
+            'res_model': 'product.dimension.edit',
+            'context': {
+                'default_product_ids': self.ids,
+                'default_dimensional_uom_id': self[0].dimensional_uom_id.id,
+                'default_weight_user_uom_id': self[0].weight_user_uom_id.id,
+            },
+            'type': 'ir.actions.act_window',
+            'target': 'new'
+        }
+
 
 class ProductTemplate(models.Model):
     _inherit = 'product.template'
@@ -87,45 +101,31 @@ class ProductTemplate(models.Model):
         default_weight_uom_id = self.env['uom.uom'].browse(default_weight_uom_id and int(default_weight_uom_id))
         return default_weight_uom_id or self._get_weight_uom_id_from_ir_config_parameter()
 
-    def action_edit_dimension_multi(self):
-        return {
-            'name': "Bulk Edit Dimensions",
-            'view_mode': 'form',
-            'res_model': 'product.dimension.edit',
-            'context': {
-                'default_product_template_ids': self.ids,
-                'default_dimensional_uom_id': self[0].dimensional_uom_id.id,
-                'default_weight_user_uom_id': self[0].weight_user_uom_id.id,
-            },
-            'type': 'ir.actions.act_window',
-            'target': 'new'
-        }
-
 
 class ProductDimension(models.TransientModel):
     _name = 'product.dimension.edit'
     _description = 'Product Dimensions'
 
-    product_template_ids = fields.Many2many('product.template', required=True)
+    product_ids = fields.Many2many('product.product', required=True)
 
-    product_length = fields.Float(related="product_template_ids.product_length", readonly=False, store=True)
-    product_width = fields.Float(related="product_template_ids.product_width", readonly=False, store=True)
-    product_height = fields.Float(related="product_template_ids.product_height", readonly=False, store=True)
-    dimensional_uom_id = fields.Many2one(related="product_template_ids.dimensional_uom_id", readonly=False, required=True,
-                                         default=lambda self: self.product_template_ids._get_default_dimension_user_uom_id().id)
+    product_length = fields.Float(related="product_ids.product_length", readonly=False, store=True)
+    product_width = fields.Float(related="product_ids.product_width", readonly=False, store=True)
+    product_height = fields.Float(related="product_ids.product_height", readonly=False, store=True)
+    dimensional_uom_id = fields.Many2one(related="product_ids.dimensional_uom_id", readonly=False, required=True,
+                                         default=lambda self: self.product_ids.product_tmpl_id._get_default_dimension_user_uom_id().id)
 
-    weight_user = fields.Float(related="product_template_ids.weight_user", readonly=False)
-    weight_user_uom_id = fields.Many2one(related="product_template_ids.weight_user_uom_id", readonly=False, required=True,
-                                         default=lambda self: self.product_template_ids._get_default_weight_user_uom_id().id)
+    weight_user = fields.Float(related="product_ids.weight_user", readonly=False)
+    weight_user_uom_id = fields.Many2one(related="product_ids.weight_user_uom_id", readonly=False, required=True,
+                                         default=lambda self: self.product_ids.product_tmpl_id._get_default_weight_user_uom_id().id)
 
-    freight_code = fields.Many2one(related="product_template_ids.freight_code", readonly=False,
-                                   default=lambda self: self.product_template_ids.freight_code.get_maximum().id)
+    freight_code = fields.Many2one(related="product_ids.freight_code", readonly=False,
+                                   default=lambda self: self.product_ids.freight_code.get_maximum().id)
 
-    shipping_hazardous = fields.Boolean(related='product_template_ids.shipping_hazardous', readonly=False)
-    shipping_perishable = fields.Boolean(related='product_template_ids.shipping_perishable', readonly=False)
+    shipping_hazardous = fields.Boolean(related='product_ids.shipping_hazardous', readonly=False)
+    shipping_perishable = fields.Boolean(related='product_ids.shipping_perishable', readonly=False)
 
     def action_save(self):
-        self.product_template_ids.write({
+        self.product_ids.write({
             'product_length': self.product_length,
             'product_width': self.product_width,
             'product_height': self.product_height,
