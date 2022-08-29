@@ -1,5 +1,6 @@
 from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError
+import json
 
 
 class ProductPackaging(models.Model):
@@ -19,6 +20,24 @@ class ProductPackaging(models.Model):
     packaging_length = fields.Float()
     volume = fields.Float(compute='_compute_volume', store=True)
     dimension_max = fields.Float(compute='_compute_dimension_max', store=True)
+
+    @api.model
+    def _rewrite_package_lwh(self):
+        """
+        When the 'delivery' module updates, all lwh are reset.
+        This reloads the values after a module update.
+        """
+        lwh_map = self.env['ir.config_parameter'].sudo().get_param('delivery_api.delivery_api_package_dimensions')
+        if lwh_map:
+            lwh_map = json.loads(lwh_map)
+            for p_id, (l, w, h) in lwh_map.items():
+                p = self.browse(int(p_id))
+                if p.exists() and p.packaging_length == p.width == p.height == 0:
+                    p.write({
+                        'packaging_length': l,
+                        'width': w,
+                        'height': h
+                    })
 
     @api.constrains('variable_dimensions', 'min_height', 'height')
     def _constrain_min_dimensions(self):
@@ -48,4 +67,16 @@ class ProductPackaging(models.Model):
         res = super(ProductPackaging, self).write(vals)
         if any(f in vals for f in ['packaging_length', 'width', 'height', 'variable_dimensions', 'min_height', 'max_weight']):
             self.env['sale.order.line'].clear_caches()
+
+        if any(f in vals for f in ['packaging_length', 'width', 'height']):
+            # Save lwh values in case of 'delivery' module update
+            lwh_map = {
+                p.id: (p.packaging_length, p.width, p.height)
+                for p in self.search([('package_carrier_type', '=', 'ship_api')])
+            }
+            self.env['ir.config_parameter'].sudo().set_param('delivery_api.delivery_api_package_dimensions', json.dumps(lwh_map))
         return res
+
+    _sql_constraints = [
+        ('positive_min_height', 'CHECK(min_height>=0)', 'Minimum Height must be positive'),
+    ]
