@@ -7,8 +7,11 @@ from py3dbp import Packer, Bin, Item
 MAX_WEIGHT = 999999999
 
 
-def fits_in_box(items, length, width, height):
+def fits_in_box(items, length, width, height, packing_ratio):
     """ No need to check weight since it was accounted for in the initial package database search """
+    if packing_ratio:
+        r = 1 - packing_ratio
+        length, width, height = length * r, width * r, height * r
 
     packer = Packer()
     packer.add_bin(Bin('bin', width, height, length, MAX_WEIGHT))
@@ -18,29 +21,29 @@ def fits_in_box(items, length, width, height):
     return not bool(packer.bins[0].unfitted_items)
 
 
-def _find_height(items, items_volume, iterations, length, width, min_height, max_height):
+def _find_height(items, items_volume, iterations, length, width, min_height, max_height, packing_ratio):
     """ Recursive binary search for finding a minimum package height """
 
     iterations -= 1
     height = (min_height + max_height) / 2
     box_volume = length * width * height
-    if box_volume > items_volume and fits_in_box(items, length, width, height):
+    if box_volume > items_volume and fits_in_box(items, length, width, height, packing_ratio):
         if iterations <= 0:
             return height
-        return _find_height(items, items_volume, iterations, length, width, min_height, height)
+        return _find_height(items, items_volume, iterations, length, width, min_height, height, packing_ratio)
     else:
         if iterations <= 0:
             return max_height
-        return _find_height(items, items_volume, iterations, length, width, height, max_height)
+        return _find_height(items, items_volume, iterations, length, width, height, max_height, packing_ratio)
 
 
-def find_height(items, items_volume, length, width, min_height, max_height):
+def find_height(items, items_volume, length, width, min_height, max_height, packing_ratio):
     # Try minimum height before running recursive testing
-    if fits_in_box(items, length, width, min_height):
+    if fits_in_box(items, length, width, min_height, packing_ratio):
         return min_height
     else:
         iteration_count = max(3, min(6, round((max_height - min_height) * 10)))
-        return _find_height(items, items_volume, iteration_count, length, width, min_height, max_height)
+        return _find_height(items, items_volume, iteration_count, length, width, min_height, max_height, packing_ratio)
 
 
 class SaleOrder(models.Model):
@@ -76,7 +79,7 @@ class SaleOrderLine(models.Model):
             return self.env['product.packaging'], 0, 0, 0, 0
 
         largest_product_dimension = max(self.product_id.mapped('product_dimension_max_u'))
-        total_weight = sum(
+        products_weight = sum(
             l.product_id.weight
             for l in self
             for x in range(ceil(l.product_qty))
@@ -88,7 +91,7 @@ class SaleOrderLine(models.Model):
         )
         available_package_ids = self.env['product.packaging'].search([
             ('package_carrier_type', '=', 'ship_api'), '&', '&',
-            '|', ('max_weight', '<=', 0), ('max_weight', '>=', total_weight),
+            '|', ('max_weight', '<=', 0), ('max_weight', '>=', products_weight),
             '|', ('dimension_max', '<=', 0), ('dimension_max', '>=', largest_product_dimension),
             ('volume', '>=', total_volume)
         ])
@@ -102,10 +105,17 @@ class SaleOrderLine(models.Model):
 
         # Find all packages that items fit in, and store the smallest dimensions it will fit
         packages_dimensions = []
+        total_weight = products_weight
         for p_id in available_package_ids.sorted('volume'):
-            if fits_in_box(items, p_id.packaging_length, p_id.width, p_id.height):
+            total_weight = products_weight + p_id.package_weight
+            if total_weight > p_id.max_weight:
+                continue
+
+            percent_of_max_weight = total_weight / p_id.max_weight
+            packing_ratio = p_id.min_packing_ratio + (p_id.max_packing_ratio - p_id.min_packing_ratio) * percent_of_max_weight
+            if fits_in_box(items, p_id.packaging_length, p_id.width, p_id.height, packing_ratio):
                 if p_id.variable_dimensions:
-                    height = find_height(items, total_volume, p_id.packaging_length, p_id.width, p_id.min_height, p_id.height)
+                    height = find_height(items, total_volume, p_id.packaging_length, p_id.width, p_id.min_height, p_id.height, packing_ratio)
                     packages_dimensions.append((p_id, p_id.packaging_length, p_id.width, height))
                 else:
                     packages_dimensions.append((p_id, p_id.packaging_length, p_id.width, p_id.height))

@@ -17,7 +17,10 @@ class ProductPackaging(models.Model):
     variable_dimensions = fields.Boolean(string="Variable Height")
     min_height = fields.Float("Minimum Height")
     width = fields.Float()
-    packaging_length = fields.Float()
+    packaging_length = fields.Float(string="Length")
+    min_packing_ratio = fields.Float(help="Percentage of packaging material used at zero weight")
+    max_packing_ratio = fields.Float(help="Percentage of packaging material used at max weight")
+    package_weight = fields.Float(string="Added Weight", help="Additional weight added by the package its self\ne.g. cardboard box, pallet, packing materials")
     volume = fields.Float(compute='_compute_volume', store=True)
     dimension_max = fields.Float(compute='_compute_dimension_max', store=True)
 
@@ -45,11 +48,13 @@ class ProductPackaging(models.Model):
             if packaging.min_height >= packaging.height:
                 raise ValidationError(_("Minimum dimension must be less than Maximum dimension"))
 
-    @api.constrains('package_carrier_type', 'height', 'width', 'packaging_length')
+    @api.constrains('package_carrier_type', 'height', 'width', 'packaging_length', 'min_packing_ratio', 'max_packing_ratio')
     def _constrain_dimensions(self):
         error_packages = self.filtered(lambda x: x.package_carrier_type == 'ship_api' and not (x.height and x.width and x.packaging_length))
         if error_packages:
             raise ValidationError(_("Package must have Height, Width, and Length"))
+        if not all(0 <= p.min_packing_ratio <= p.max_packing_ratio <= 1 for p in self):
+            raise ValidationError(_("Packing ratio error"))
 
     @api.depends('height', 'width', 'packaging_length')
     def _compute_dimension_max(self):

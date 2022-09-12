@@ -18,6 +18,19 @@
                 <strong attrs="{'invisible': ['|', ('variable_dimensions', '=', False), ('package_carrier_type', '!=', 'ship_api')]}">Max=</strong>
             </xpath>
 
+            <xpath expr="//field[@name='packaging_length']/.." position="after">
+                <field name="min_packing_ratio" widget="percentage" attrs="{'invisible': [('package_carrier_type', '!=', 'ship_api')]}"/>
+                <field name="max_packing_ratio" widget="percentage" attrs="{'invisible': [('package_carrier_type', '!=', 'ship_api')]}"/>
+            </xpath>
+
+            <xpath expr="//field[@name='max_weight']/.." position="after">
+                <label for="package_weight" attrs="{'invisible': [('package_carrier_type', '!=', 'ship_api')]}"/>
+                <div class="o_row" name="package_weight" attrs="{'invisible': [('package_carrier_type', '!=', 'ship_api')]}">
+                  <field name="package_weight"/>
+                  <span><field name="weight_uom_name"/></span>
+                </div>
+            </xpath>
+
         </field>
     </record>
 
