@@ -12,10 +12,10 @@ class PortalSaleShippingApi(CustomerPortal):
     def details_form_validate(self, data):
         error, error_message = super().details_form_validate(data)
 
-        country = data.get('country_id')
-        state = data.get('state_id')
+        country = data.get('country_id', 0)
+        state = data.get('state_id', 0)
 
-        if country and state and not error:
+        if country and not error:
             country_id = request.env['res.country'].browse(int(country))
             state_id = request.env['res.country'].browse(int(state))
             try:

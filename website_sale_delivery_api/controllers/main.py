@@ -10,10 +10,12 @@ class WebsiteSaleShippingApi(WebsiteSale):
     def values_postprocess(self, *args, **kwargs):
         new_values, errors, error_msg = super().values_postprocess(*args, **kwargs)
 
-        country_id = request.env['res.country'].browse(int(new_values.get('country_id')))
-        state_id = request.env['res.country'].browse(int(new_values.get('state_id')))
+        country = new_values.get('country_id', 0)
+        state = new_values.get('state_id', 0)
 
-        if country_id and state_id and not errors:
+        if country and not errors:
+            country_id = request.env['res.country'].browse(int(country))
+            state_id = request.env['res.country'].browse(int(state))
             try:
                 success, message, user_confirm, data = request.env.company.address_verify_ship_api_id.sudo()._verify_address(
                     new_values.get('name'),
