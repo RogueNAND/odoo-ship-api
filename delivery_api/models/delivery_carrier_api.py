@@ -2,7 +2,7 @@ from odoo import api, fields, models, _
 from odoo.tools import groupby, ormcache
 from odoo.exceptions import UserError
 from datetime import timedelta
-import logging, math
+import json, logging
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +29,9 @@ class DeliveryCarrierApi(models.Model):
     possible_outage_detected = fields.Boolean()
     last_cache_clear_time = fields.Datetime(default=lambda x: fields.Datetime.now())
 
+    log_enable = fields.Boolean("Debug Logging")
+    log_count = fields.Integer(compute='_compute_log_count')
+
     @api.depends('carrier_ids.prod_environment')
     def _compute_global_prod_environment(self):
         for api in self:
@@ -43,6 +46,10 @@ class DeliveryCarrierApi(models.Model):
         self.supports_returns = False
         for record in self.filtered('delivery_api'):
             getattr(record, '%s_supports' % record.delivery_api)()
+
+    def _compute_log_count(self):
+        for record in self:
+            record.log_count = self.env['delivery.carrier.api.log'].search_count([('delivery_api', '=', self.id)])
 
     @api.model
     def _manage_cache(self):
@@ -254,4 +261,40 @@ class DeliveryCarrierApi(models.Model):
             length, width, height, weight,
             *attributes.values(),
         ))
-        return self.sudo()._rate_estimate(cache_hash, from_partner_id, to_partner_id, length, width, height, weight, attributes, log_msg)
+
+        return self.sudo().with_context(rate_order_id=order_line_ids.order_id.id)._rate_estimate(
+            cache_hash, from_partner_id, to_partner_id, length, width, height, weight, attributes, log_msg
+        )
+
+    def action_view_logs(self):
+        return {
+            'name': "Logs",
+            'view_mode': 'tree,form',
+            'res_model': 'delivery.carrier.api.log',
+            'domain': [('delivery_api', '=', self.id)],
+            'type': 'ir.actions.act_window',
+            'target': 'current'
+        }
+
+    def log_request(self, request, response):
+        if not self.log_enable:
+            return
+
+        return self.env['delivery.carrier.api.log'].sudo().create({
+            'delivery_api': self.id,
+            'order_id': self._context.get('rate_order_id'),
+            'context': str(self._context),
+            'request': str(request),
+            'response': str(response)
+        })
+
+    def log_request_json(self, request: dict, response: dict):
+        if not self.log_enable:
+            return
+
+        try:
+            request_json = json.dumps(request, indent=2)
+            response_json = json.dumps(response, indent=2)
+            return self.log_request(request_json, response_json)
+        except Exception:
+            return self.log_request(request, response)

@@ -37,6 +37,9 @@
                         <button name="action_view_shipping_methods" type="object" class="oe_stat_button" icon="fa-truck">
                             <field string="Methods" name="carrier_ids" widget="statinfo"/>
                         </button>
+                        <button name="action_view_logs" type="object" class="oe_stat_button" icon="fa-code" groups="sales_team.group_sale_manager">
+                            <field string="Logs" name="log_count" widget="statinfo"/>
+                        </button>
                     </div>
                     <div class="oe_title">
                         <h1>
@@ -48,6 +51,7 @@
                             <field name="delivery_api" required="1"/>
                             <field name="api_key_prod"/>
                             <field name="api_key_test"/>
+                            <field name="log_enable" widget="boolean_toggle"/>
                             <field name="currency_id"/>
                             <field name="api_carrier_ids">
                                 <tree>

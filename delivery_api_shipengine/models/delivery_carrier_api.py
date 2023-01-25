@@ -18,7 +18,9 @@ class DeliveryCarrierApi(models.Model):
             'API-Key': api_key,
             'Content-Type': 'application/json'
         }
-        return requests.request(request_type, url, headers=headers, data=json.dumps(data or {})).json()
+        response = requests.request(request_type, url, headers=headers, data=json.dumps(data or {})).json()
+        self.log_request_json(data, response)
+        return response
 
     def shipengine_sync(self):
         data = self._shipengine_call(bool(self.api_key_prod), "/v1/carriers", 'GET')
