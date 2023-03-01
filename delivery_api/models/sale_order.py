@@ -125,8 +125,9 @@ class SaleOrderLine(models.Model):
 
         # Find package with the smallest volume
         package = min(packages_dimensions, key=lambda x: x[1] * x[2] * x[3])
+        length, width, height = sorted((package[1], package[2], package[3]), reverse=True)
 
-        return package[0].id, package[1], package[2], package[3], total_weight
+        return package[0].id, length, width, height, total_weight
 
     def estimate_package(self):
         line_ids = self.filtered(lambda x:
