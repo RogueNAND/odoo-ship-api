@@ -19,7 +19,7 @@
         <field name="view_mode">list,form</field>
     </record>
     <menuitem id="delivery_carrier_api_stock_menu"
-              parent="delivery.menu_delivery"
+              parent="stock.menu_delivery"
               name="Shipping API's"
               action="delivery_carrier_api_stock_menu_action"
               sequence="2"/>

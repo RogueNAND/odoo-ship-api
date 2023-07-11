@@ -3,8 +3,8 @@ from odoo.exceptions import ValidationError
 import json
 
 
-class ProductPackaging(models.Model):
-    _inherit = 'product.packaging'
+class StockPackageType(models.Model):
+    _inherit = 'stock.package.type'
 
     package_carrier_type = fields.Selection(selection_add=[('ship_api', 'Shipping API')], ondelete={'ship_api': 'set default'})
     freight_package_type = fields.Selection([
@@ -14,10 +14,10 @@ class ProductPackaging(models.Model):
         ('conex', "Conex")
     ], string="Freight Package")
     height = fields.Float()
+    width = fields.Float()
+    packaging_length = fields.Float()
     variable_dimensions = fields.Boolean(string="Variable Height")
     min_height = fields.Float("Minimum Height")
-    width = fields.Float()
-    packaging_length = fields.Float(string="Length")
     min_packing_ratio = fields.Float(help="Percentage of packaging material used at zero weight")
     max_packing_ratio = fields.Float(help="Percentage of packaging material used at max weight")
     package_weight = fields.Float(string="Added Weight", help="Additional weight added by the package its self\ne.g. cardboard box, pallet, packing materials")
@@ -69,7 +69,7 @@ class ProductPackaging(models.Model):
     def write(self, vals):
         """ Ensure sale.order.line estimate_package() does not pull from cache if any packages are changed """
 
-        res = super(ProductPackaging, self).write(vals)
+        res = super(StockPackageType, self).write(vals)
         if any(f in vals for f in ['packaging_length', 'width', 'height', 'variable_dimensions', 'min_height', 'max_weight']):
             self.env['sale.order.line'].clear_caches()
 

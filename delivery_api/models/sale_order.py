@@ -89,7 +89,7 @@ class SaleOrderLine(models.Model):
             for l in self
             for x in range(ceil(l.product_qty))
         )
-        available_package_ids = self.env['product.packaging'].search([
+        available_package_ids = self.env['stock.package.type'].search([
             ('package_carrier_type', '=', 'ship_api'), '&', '&',
             '|', ('max_weight', '<=', 0), ('max_weight', '>=', products_weight),
             '|', ('dimension_max', '<=', 0), ('dimension_max', '>=', largest_product_dimension),

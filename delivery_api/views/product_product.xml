@@ -155,7 +155,7 @@
         <field name="help" type="html"><p class="o_view_nocontent_smiling_face">No Dimensions to Resolve</p></field>
     </record>
     <menuitem id="product_product_dimensions_menu"
-              parent="delivery.menu_delivery"
+              parent="stock.menu_delivery"
               name="Product Dimensions"
               action="product_product_dimensions_menu_action"
               sequence="20"/>

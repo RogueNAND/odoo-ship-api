@@ -1,6 +1,6 @@
 <odoo>
 
     <!-- Fix delivery module update -->
-    <function model="product.packaging" name="_rewrite_package_lwh"/>
+    <function model="stock.package.type" name="_rewrite_package_lwh"/>
 
 </odoo>
