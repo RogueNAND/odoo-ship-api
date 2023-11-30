@@ -2,7 +2,7 @@ from odoo import models
 from odoo.tools import ormcache
 from collections import defaultdict
 from math import ceil
-from py3dbp import Packer, Bin, Item
+from py3dbp.main import Packer, Bin, Item
 
 MAX_WEIGHT = 999999999
 
