@@ -8,6 +8,7 @@ class ResPartner(models.Model):
     address_indicator = fields.Selection([('residential', "🏠 Residential"), ('commercial', "🏢 Commercial")], readonly=True)
     ship_stored_hash = fields.Char(readonly=True)
     ship_live_hash = fields.Char(compute='_compute_ship_address_dirty', store=True)
+    can_verify_address = fields.Boolean(compute='_compute_can_verify_address')
     ship_address_dirty = fields.Boolean(compute='_compute_ship_address_dirty', store=True)
 
     @api.model
@@ -37,6 +38,9 @@ class ResPartner(models.Model):
                 partner_id.address_indicator
             )
             partner_id.ship_address_dirty = partner_id.ship_stored_hash != partner_id.ship_live_hash
+
+    def _compute_can_verify_address(self):
+        self.can_verify_address = bool(self.env.user.company_id.address_verify_ship_api_id)
 
     def action_verify_ship_address(self):
         self.ensure_one()

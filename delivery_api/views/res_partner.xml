@@ -6,14 +6,15 @@
         <field name="inherit_id" ref="base.view_partner_form"/>
         <field name="arch" type="xml">
 
-            <field name="country_id" position="after">
+            <xpath expr="//field[@name='country_id']/.." position="after">
                 <field name="ship_stored_hash" invisible="1"/>
                 <field name="address_indicator" nolabel="1" attrs="{'invisible': ['|', ('ship_address_dirty', '=', True), ('address_indicator', '=', False)]}"/>
                 <span attrs="{'invisible': ['|', ('ship_address_dirty', '=', True), ('address_indicator', '!=', False)]}">Unknown RDI</span>
+                <field name="can_verify_address" invisible="1"/>
                 <field name="ship_address_dirty" invisible="1"/>
                 <button name="action_verify_ship_address" string="Verify Shipping Address" type="object" class="btn-secondary"
-                        attrs="{'invisible': ['|', ('ship_address_dirty', '=', False), '&amp;', ('type', '=', 'contact'), ('parent_id', '!=', False)]}"/>
-            </field>
+                        attrs="{'invisible': ['|', '|', ('can_verify_address', '=', False), ('ship_address_dirty', '=', False), '&amp;', ('type', '=', 'contact'), ('parent_id', '!=', False)]}"/>
+            </xpath>
 
         </field>
     </record>
